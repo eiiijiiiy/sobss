@@ -407,39 +407,34 @@ pair<double, int> computing_merging_cost_of_one_pair(
     double vol_nbh_diff, vol_diff;
     try
     {
-        diff = plh_j - plh_i;
+        diff = plh_i - plh_j;
+
+        if (diff == Nef_Polyhedron::EMPTY)
+            vol_diff = 0;
+        else
+            vol_diff = computing_volume_of_nef_polyhedron(diff);
     }
     catch(const std::exception& e)
     {
-        // CGAL::draw(new_vol);
+        CGAL::draw(diff);
+        vol_diff = 1e7;
     }
-
+    
     try
     {
         nbh_diff = plh_merge - plh_nbh;
+
+        if (nbh_diff == Nef_Polyhedron::EMPTY)
+            vol_nbh_diff = 0;
+            
+        else
+            vol_nbh_diff = computing_volume_of_nef_polyhedron(nbh_diff);
     }
     catch(const std::exception& e)
     {
         // CGAL::draw(new_vol);
+        vol_nbh_diff = 1e7;
     }
-    if (diff == Nef_Polyhedron::EMPTY)
-    {
-        vol_diff = 0;
-    }
-    else
-    {
-        vol_diff = computing_volume_of_nef_polyhedron(diff);
-    }
-    vol_diff *= 5;
-
-    if (nbh_diff == Nef_Polyhedron::EMPTY)
-    {
-        vol_nbh_diff = 0;
-    }
-    else
-    {
-        vol_nbh_diff = computing_volume_of_nef_polyhedron(nbh_diff);
-    }           
     
     if (vol_diff < vol_nbh_diff)
         return make_pair(vol_diff, -1);
@@ -476,6 +471,7 @@ double precomputing_merging_cost(
     {
         vector<double> v = vol_params[i];
         all_vol_vol(i) = compute_volume_from_param(v);
+        // all_vol_vol(i) = computing_volume_of_nef_polyhedron(vol_n_polyhedra[i]);
         get_8pts_of_a_volume_from_param(v, all_8pts_vol[i]);
         min_allx(i) = all_8pts_vol[i].col(0).minCoeff();
         max_allx(i) = all_8pts_vol[i].col(0).maxCoeff();
