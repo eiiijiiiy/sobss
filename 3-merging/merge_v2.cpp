@@ -430,6 +430,7 @@ pair<double, int> computing_merging_cost_of_one_pair(
     {
         vol_diff = computing_volume_of_nef_polyhedron(diff);
     }
+    vol_diff *= 5;
 
     if (nbh_diff == Nef_Polyhedron::EMPTY)
     {
@@ -575,7 +576,7 @@ double precomputing_merging_cost(
         vector<double> merged_v(7);
         auto start = chrono::high_resolution_clock::now();
         size_t i = p.first, j = p.second;
-        cout << "Z1 i: " << i << ", j: " << j ;
+        // cout << "Z1 i: " << i << ", j: " << j ;
         double 
             min_x = min_allx(i) < min_allx(j) ? min_allx(i) : min_allx(j),
             max_x = max_allx(i) > max_allx(j) ? max_allx(i) : max_allx(j),
@@ -604,7 +605,7 @@ double precomputing_merging_cost(
 
         auto end = chrono::high_resolution_clock::now();
         auto duration = chrono::duration_cast<chrono::microseconds>(end - start);
-        cout << " with duration: " << duration.count()/1000000.0 << " sec" << endl;
+        // cout << " with duration: " << duration.count()/1000000.0 << " sec" << endl;
     }
 
     cout << "processing Z2_pairs " << endl;
@@ -638,8 +639,8 @@ double precomputing_merging_cost(
         merge_in_out(i, j) = result.second;
         auto end = chrono::high_resolution_clock::now();
         auto duration = chrono::duration_cast<chrono::microseconds>(end - start);
-        cout << "Z2 i: " << i << ", j: " << j 
-             << " with duration: " << duration.count()/1000000.0 << " sec" << endl;
+        // cout << "Z2 i: " << i << ", j: " << j 
+        //      << " with duration: " << duration.count()/1000000.0 << " sec" << endl;
     }
 
     cout << "processing Z3_pairs " << endl;
@@ -677,8 +678,8 @@ double precomputing_merging_cost(
         merge_in_out(i, j) = result.second;
         auto end = chrono::high_resolution_clock::now();
         auto duration = chrono::duration_cast<chrono::microseconds>(end - start);
-        cout << "Z3 i: " << i << ", j: " << j 
-             << " with duration: " << duration.count()/1000000.0 << " sec" << endl;
+        // cout << "Z3 i: " << i << ", j: " << j 
+        //      << " with duration: " << duration.count()/1000000.0 << " sec" << endl;
     }
 
     return total_volume;
@@ -1014,8 +1015,8 @@ int main(int argc, char* argv[]){
     
     string input_param_dir, 
            root_output_param_dir, root_output_mesh_dir, root_output_union_dir, root_output_union_tri_dir, 
-           log_dir, sample_string;
-        //    root_output_merging_cost_matrix_dir, root_output_mergedto_matrix_dir,
+           log_dir, sample_string,
+           root_output_merging_cost_matrix_dir, root_output_mergedto_matrix_dir, root_output_merging_in_out_dir;
            
     int sample_num;
 
@@ -1046,11 +1047,15 @@ int main(int argc, char* argv[]){
     while (getline(ss, sn, ' '))
         sample_names.push_back(sn);
     
-    // if (config_doc.HasMember("root_output_merging_cost_matrix_dir") && config_doc["root_output_merging_cost_matrix_dir"].IsString())
-    //     root_output_merging_cost_matrix_dir = config_doc["root_output_merging_cost_matrix_dir"].GetString();
+    if (config_doc.HasMember("root_output_merging_cost_matrix_dir") && config_doc["root_output_merging_cost_matrix_dir"].IsString())
+        root_output_merging_cost_matrix_dir = config_doc["root_output_merging_cost_matrix_dir"].GetString();
     
-    // if (config_doc.HasMember("root_output_mergedto_matrix_dir") && config_doc["root_output_mergedto_matrix_dir"].IsString())
-    //     root_output_mergedto_matrix_dir = config_doc["root_output_mergedto_matrix_dir"].GetString();
+    if (config_doc.HasMember("root_output_mergedto_matrix_dir") && config_doc["root_output_mergedto_matrix_dir"].IsString())
+        root_output_mergedto_matrix_dir = config_doc["root_output_mergedto_matrix_dir"].GetString();
+    
+    if (config_doc.HasMember("root_output_merging_in_out_dir") && config_doc["root_output_merging_in_out_dir"].IsString())
+        root_output_merging_in_out_dir = config_doc["root_output_merging_in_out_dir"].GetString();
+
 
     if (config_doc.HasMember("log_dir") && config_doc["log_dir"].IsString())
         log_dir = config_doc["log_dir"].GetString();
@@ -1073,6 +1078,19 @@ int main(int argc, char* argv[]){
     vector<double> lambdas {0.25};
 
     for (auto sigma : sigmas)
+    {
+        string output_merging_cost_dir = root_output_merging_cost_matrix_dir + "sigma_" + to_string(sigma);
+        if (!filesystem::is_directory(output_merging_cost_dir) || !filesystem::exists(output_merging_cost_dir))
+        {
+            filesystem::create_directories(output_merging_cost_dir);
+        }
+
+        string output_merging_inout_dir = root_output_merging_in_out_dir + "sigma_" + to_string(sigma);
+        if (!filesystem::is_directory(output_merging_inout_dir) || !filesystem::exists(output_merging_inout_dir))
+        {
+            filesystem::create_directories(output_merging_inout_dir);
+        }
+
         for (auto lambda : lambdas)
         {   
             string output_param_dir = root_output_param_dir 
@@ -1110,8 +1128,17 @@ int main(int argc, char* argv[]){
             {
                 filesystem::create_directories(output_union_tri_dir);
             }
-        }
 
+            string output_mergeto_dir = root_output_mergedto_matrix_dir
+                                + "sigma_" + to_string(sigma) 
+                                + "_lambda_" + to_string(lambda)
+                                + "/";
+            if (!filesystem::is_directory(output_mergeto_dir) || !filesystem::exists(output_mergeto_dir))
+            {
+                filesystem::create_directories(output_mergeto_dir);
+            }
+        }
+    }
 
     chrono::time_point<std::chrono::high_resolution_clock> start, end;
     std::chrono::duration<double, std::milli> duration_ms;
@@ -1161,6 +1188,26 @@ int main(int argc, char* argv[]){
                 input_vol_params, num_box, merging_cost, merge_in_out, all_8pts_vol,
                 min_allx, max_allx, min_ally, max_ally, min_allz, max_allz,
                 num_pairs, sigma);
+            
+            string merging_cost_path = root_output_merging_cost_matrix_dir + 
+                                        "sigma_" + to_string(sigma) + "/" + sample_names[i] + ".txt";
+            ofstream merging_cost_o;
+            merging_cost_o.open(merging_cost_path);
+            for (size_t vid = 0; vid < merging_cost.rows(); vid++)
+            {
+               merging_cost_o << merging_cost.row(vid) << "\n";
+            }
+            merging_cost_o.close();
+
+            string merging_inout_path = root_output_merging_in_out_dir + 
+                                        "sigma_" + to_string(sigma) + "/" + sample_names[i] + ".txt";
+            ofstream merging_inout_o;
+            merging_inout_o.open(merging_inout_path);
+            for (size_t vid = 0; vid < merge_in_out.rows(); vid++)
+            {
+               merging_inout_o << merge_in_out.row(vid) << "\n";
+            }
+            merging_inout_o.close();
 
             process_log[5] = num_pairs[0];
             process_log[6] = num_pairs[1];
@@ -1209,6 +1256,17 @@ int main(int argc, char* argv[]){
                 end = chrono::high_resolution_clock::now();
                 duration_ms = end - start;
                 process_log[2] = duration_ms.count()/1000.0;
+
+                string output_mergeto_path = root_output_mergedto_matrix_dir + 
+                                "sigma_" + to_string(sigma) + "_lambda_" + to_string(lambda) + "/" + 
+                                sample_names[i] +".txt";
+                ofstream mergeto_o;
+                mergeto_o.open(output_mergeto_path);
+                for (size_t vid = 0; vid < is_mergedto.rows(); vid++)
+                {
+                    mergeto_o << is_mergedto.row(vid) << "\n";
+                }
+                mergeto_o.close();
                 
                 // 4. parse the optimization result
                 start = chrono::high_resolution_clock::now();
