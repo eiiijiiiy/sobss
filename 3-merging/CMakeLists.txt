@@ -16,7 +16,9 @@ elseif(UNIX)
     find_package(OpenMP)
 endif()
 
-add_executable(merge merge.cpp)
+# add_executable(merge merge.cpp)
+add_executable(merge merge_v2.cpp)
+
 
 if (APPLE)
     target_link_libraries(merge 
