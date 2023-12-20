@@ -1068,10 +1068,10 @@ int main(int argc, char* argv[]){
          << "\t root_output_union_dir: " << root_output_union_dir << endl
          << "\t log_dir: " << log_dir << endl;
 
-    // vector<double> sigmas {0.25, 0.5, 1, 2, 4};
-    // vector<double> lambdas {0.125, 0.25, 0.5, 1, 2, 4, 8};
-    vector<double> sigmas {0.5};
-    vector<double> lambdas {0.25};
+    vector<double> sigmas {0.25, 0.5, 1, 2, 4};
+    vector<double> lambdas {0.125, 0.25, 0.5, 1, 2, 4, 8};
+    // vector<double> sigmas {0.5,};
+    // vector<double> lambdas {0.25};
 
     for (auto sigma : sigmas)
     {

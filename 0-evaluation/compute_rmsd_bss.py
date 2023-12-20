@@ -61,8 +61,8 @@ truncated_dist = [0.5, 1., 2.]
 
 import argparse
 parser = argparse.ArgumentParser()
-parser.add_argument('--c', type=float, required=True)
-parser.add_argument('--t', type=str, required=True)
+parser.add_argument('-c', type=float, required=True)
+parser.add_argument('-t', type=str, required=True)
 args = parser.parse_args()
 assert args.t in 'mi'
 if args.t == 'm':
@@ -71,12 +71,12 @@ else:
     sample_num = 5
 
 this_type = '3-select_primary_normal_manhattan_revision' if args.t == 'm' else '4-select_primary_normal_incline_roof_revision'
-aa_dir = '/media/y/18T/parallelism_2022/revision_exper/{}/1-axisalign'.format(this_type)
-root_union_tri_dir = '/media/y/18T/parallelism_2022/revision_exper/{}/sensitivity/merge/union_tri'.format(this_type)
-root_union_tri_rb_dir = '/media/y/18T/parallelism_2022/revision_exper/{}/sensitivity/merge/union_tri_rb'.format(this_type)
-root_r2s_dir = '/media/y/18T/parallelism_2022/revision_exper/{}/sensitivity/merge/r2s'.format(this_type)
-root_s2r_dir = '/media/y/18T/parallelism_2022/revision_exper/{}/sensitivity/merge/s2r'.format(this_type)
-root_rmsd_dir = '/media/y/18T/parallelism_2022/revision_exper/{}/sensitivity/merge/rmsd'.format(this_type)
+aa_dir = '/media/y/18T/parallelism_2022/exper_revision/{}/1-axisalign'.format(this_type)
+root_union_tri_dir = '/media/y/18T/parallelism_2022/exper_revision/{}/sensitivity/merge_revision3/union_tri'.format(this_type)
+root_union_tri_rb_dir = '/media/y/18T/parallelism_2022/exper_revision/{}/sensitivity/merge_revision3/union_tri_rb'.format(this_type)
+root_r2s_dir = '/media/y/18T/parallelism_2022/exper_revision/{}/sensitivity/merge_revision3/r2s'.format(this_type)
+root_s2r_dir = '/media/y/18T/parallelism_2022/exper_revision/{}/sensitivity/merge_revision3/s2r'.format(this_type)
+root_rmsd_dir = '/media/y/18T/parallelism_2022/exper_revision/{}/sensitivity/merge_revision3/rmsd'.format(this_type)
 
 
 
