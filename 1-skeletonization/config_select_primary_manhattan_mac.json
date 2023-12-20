@@ -1,0 +1,16 @@
+{
+    "orientation_max_iter": 100,
+    "half_PI_bin_num": 100, 
+    "horizontal_normal_z_thresh": 0.95,
+    "vertical_normal_z_thresh": 0.5,
+    "voxel_size": 0.25,
+    "normal_pair_thresh": 0.1,
+    "save_axis_aligned": true,
+    "sample_num": 10,
+    "input_pcd_dir": "/Users/yijie/Library/CloudStorage/OneDrive-connect.hku.hk/2022_Building_Section_Skeleton_exper/3-select_primary_normal_manhattan_revision/0-input/",
+    "time_log_dir": "/Users/yijie/Library/CloudStorage/OneDrive-connect.hku.hk/2022_Building_Section_Skeleton_exper/3-select_primary_normal_manhattan_revision/",
+    "output_axis_aligned_dir": "/Users/yijie/Library/CloudStorage/OneDrive-connect.hku.hk/2022_Building_Section_Skeleton_exper/3-select_primary_normal_manhattan_revision/1-axisalign/", 
+    "save_group_root_dir": "/Users/yijie/Library/CloudStorage/OneDrive-connect.hku.hk/2022_Building_Section_Skeleton_exper/3-select_primary_normal_manhattan_revision/2-normal_group/",
+    "voted_params_dir": "/Users/yijie/Library/CloudStorage/OneDrive-connect.hku.hk/2022_Building_Section_Skeleton_exper/3-select_primary_normal_manhattan_revision/3-voted/", 
+    "voted_center_pcd_dir": "/Users/yijie/Library/CloudStorage/OneDrive-connect.hku.hk/2022_Building_Section_Skeleton_exper/3-select_primary_normal_manhattan_revision/3-voted_pcd/"
+}

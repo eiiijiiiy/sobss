@@ -1,0 +1,9 @@
+{
+    "input_param_dir": "/Volumes/SSD/yijie_revision2_exper/5-KSR_SOBSS/sensitivity/coarse_segmentation/param/2.0/",
+    "root_output_param_dir": "/Volumes/SSD/yijie_revision2_exper/5-KSR_SOBSS/sensitivity/merge/param/2.0/",
+    "root_output_mesh_dir": "/Volumes/SSD/yijie_revision2_exper/5-KSR_SOBSS/sensitivity/merge/mesh/2.0/",
+    "root_output_union_dir": "/Volumes/SSD/yijie_revision2_exper/5-KSR_SOBSS/sensitivity/merge/union/2.0/",
+    "root_output_union_tri_dir": "/Volumes/SSD/yijie_revision2_exper/5-KSR_SOBSS/sensitivity/merge/union_tri/2.0/",
+    "log_dir": "/Volumes/SSD/yijie_revision2_exper/5-KSR_SOBSS/sensitivity/merge/log/2.0/",
+    "sample_names": "5"
+}

@@ -1,0 +1,9 @@
+{
+    "input_param_dir": "/media/y/18T/parallelism_2022/revision_exper/3-select_primary_normal_manhattan_revision/sensitivity/coarse_segmentation/param/4.0/",
+    "root_output_param_dir": "/media/y/18T/parallelism_2022/revision_exper/3-select_primary_normal_manhattan_revision/sensitivity/merge/param/4.0/",
+    "root_output_mesh_dir": "/media/y/18T/parallelism_2022/revision_exper/3-select_primary_normal_manhattan_revision/sensitivity/merge/mesh/4.0/",
+    "root_output_union_dir": "/media/y/18T/parallelism_2022/revision_exper/3-select_primary_normal_manhattan_revision/sensitivity/merge/union/4.0/",
+    "root_output_union_tri_dir": "/media/y/18T/parallelism_2022/revision_exper/3-select_primary_normal_manhattan_revision/sensitivity/merge/union_tri/4.0/",
+    "log_dir": "/media/y/18T/parallelism_2022/revision_exper/3-select_primary_normal_manhattan_revision/sensitivity/merge/log/4.0/",
+    "sample_num": 10
+}
