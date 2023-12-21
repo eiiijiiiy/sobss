@@ -87,6 +87,7 @@ this_s2r_dir = '{}/{}'.format(root_s2r_dir, args.c)
 this_rmsd_dir = '{}/{}'.format(root_rmsd_dir, args.c)
 
 sigmas = [0.25, 0.5, 1, 2, 4]
+# sigmas = [2]
 lambdas = [0.125, 0.25, 0.5, 1, 2, 4, 8]
 names = [str(i+1) for i in range(sample_num)]
 for s in sigmas:

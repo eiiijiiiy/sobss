@@ -1,9 +1,12 @@
 {
-    "input_param_dir": "/media/y/18T/parallelism_2022/revision_exper/3-select_primary_normal_manhattan_revision/sensitivity/coarse_segmentation/param/1.0/",
-    "root_output_param_dir": "/media/y/18T/parallelism_2022/revision_exper/3-select_primary_normal_manhattan_revision/sensitivity/merge/param/1.0/",
-    "root_output_mesh_dir": "/media/y/18T/parallelism_2022/revision_exper/3-select_primary_normal_manhattan_revision/sensitivity/merge/mesh/1.0/",
-    "root_output_union_dir": "/media/y/18T/parallelism_2022/revision_exper/3-select_primary_normal_manhattan_revision/sensitivity/merge/union/1.0/",
-    "root_output_union_tri_dir": "/media/y/18T/parallelism_2022/revision_exper/3-select_primary_normal_manhattan_revision/sensitivity/merge/union_tri/1.0/",
-    "log_dir": "/media/y/18T/parallelism_2022/revision_exper/3-select_primary_normal_manhattan_revision/sensitivity/merge/log/1.0/",
-    "sample_num": 10
+    "input_param_dir": "/media/y/18T/parallelism_2022/exper_revision/3-select_primary_normal_manhattan_revision/sensitivity/coarse_segmentation/param/1.0/",
+    "root_output_param_dir": "/media/y/18T/parallelism_2022/exper_revision/3-select_primary_normal_manhattan_revision/sensitivity/merge_revision3_1/param/1.0/",
+    "root_output_mesh_dir": "/media/y/18T/parallelism_2022/exper_revision/3-select_primary_normal_manhattan_revision/sensitivity/merge_revision3_1/mesh/1.0/",
+    "root_output_union_dir": "/media/y/18T/parallelism_2022/exper_revision/3-select_primary_normal_manhattan_revision/sensitivity/merge_revision3_1/union/1.0/",
+    "root_output_union_tri_dir": "/media/y/18T/parallelism_2022/exper_revision/3-select_primary_normal_manhattan_revision/sensitivity/merge_revision3_1/union_tri/1.0/",
+    "root_output_merging_cost_matrix_dir": "/media/y/18T/parallelism_2022/exper_revision/3-select_primary_normal_manhattan_revision/sensitivity/merge_revision3_1/matrix/1.0/",
+    "root_output_mergedto_matrix_dir": "/media/y/18T/parallelism_2022/exper_revision/3-select_primary_normal_manhattan_revision/sensitivity/merge_revision3_1/mergeto/1.0/",
+    "root_output_merging_in_out_dir": "/media/y/18T/parallelism_2022/exper_revision/3-select_primary_normal_manhattan_revision/sensitivity/merge_revision3_1/inout/1.0/",
+    "log_dir": "/media/y/18T/parallelism_2022/exper_revision/3-select_primary_normal_manhattan_revision/sensitivity/merge_revision3_1/log/1.0/",
+    "sample_names": "1 2 3 4 5 6 7 8 9 10"
 }
