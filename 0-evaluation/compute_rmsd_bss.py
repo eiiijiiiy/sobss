@@ -72,11 +72,11 @@ else:
 
 this_type = '3-select_primary_normal_manhattan_revision' if args.t == 'm' else '4-select_primary_normal_incline_roof_revision'
 aa_dir = '/media/y/18T/parallelism_2022/exper_revision/{}/1-axisalign'.format(this_type)
-root_union_tri_dir = '/media/y/18T/parallelism_2022/exper_revision/{}/sensitivity/merge_revision3/union_tri'.format(this_type)
-root_union_tri_rb_dir = '/media/y/18T/parallelism_2022/exper_revision/{}/sensitivity/merge_revision3/union_tri_rb'.format(this_type)
-root_r2s_dir = '/media/y/18T/parallelism_2022/exper_revision/{}/sensitivity/merge_revision3/r2s'.format(this_type)
-root_s2r_dir = '/media/y/18T/parallelism_2022/exper_revision/{}/sensitivity/merge_revision3/s2r'.format(this_type)
-root_rmsd_dir = '/media/y/18T/parallelism_2022/exper_revision/{}/sensitivity/merge_revision3/rmsd'.format(this_type)
+root_union_tri_dir = '/media/y/18T/parallelism_2022/exper_revision/{}/sensitivity/merge_revision3_1/union_tri'.format(this_type)
+root_union_tri_rb_dir = '/media/y/18T/parallelism_2022/exper_revision/{}/sensitivity/merge_revision3_1/union_tri_rb'.format(this_type)
+root_r2s_dir = '/media/y/18T/parallelism_2022/exper_revision/{}/sensitivity/merge_revision3_1/r2s'.format(this_type)
+root_s2r_dir = '/media/y/18T/parallelism_2022/exper_revision/{}/sensitivity/merge_revision3_1/s2r'.format(this_type)
+root_rmsd_dir = '/media/y/18T/parallelism_2022/exper_revision/{}/sensitivity/merge_revision3_1/rmsd'.format(this_type)
 
 
 
