@@ -601,7 +601,7 @@ double precomputing_merging_cost(
         result = computing_merging_cost_of_one_pair(vol_n_polyhedra[j], vol_n_polyhedra[i], merged_for_each_row[j], new_vol);
         merging_cost(j, i) = result.first;
         merge_in_out(j, i) = result.second;
-
+        
         auto end = chrono::high_resolution_clock::now();
         auto duration = chrono::duration_cast<chrono::microseconds>(end - start);
         // cout << " with duration: " << duration.count()/1000000.0 << " sec" << endl;
@@ -679,6 +679,23 @@ double precomputing_merging_cost(
         auto duration = chrono::duration_cast<chrono::microseconds>(end - start);
         // cout << "Z3 i: " << i << ", j: " << j 
         //      << " with duration: " << duration.count()/1000000.0 << " sec" << endl;
+    }
+
+    for (size_t i = 0; i < num_vol-1; i++)
+    {
+        for (size_t j = i+1; j < num_vol; j++)
+        {
+            if (merge_in_out(i, j) == -1 && merge_in_out(j, i) == 1)
+            {
+                merging_cost(j, i) = 1e7;
+                merge_in_out(j, i) = 0;
+            }
+            else if(merge_in_out(j, i) == -1 && merge_in_out(i, j) == 1)
+            {
+                merging_cost(i, j) = 1e7;
+                merge_in_out(i, j) = 0;
+            }
+        }
     }
 
     return total_volume;
