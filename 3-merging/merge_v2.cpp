@@ -404,7 +404,10 @@ pair<double, int> computing_merging_cost_of_one_pair(
     const Nef_Polyhedron& plh_merge)
 {
     Nef_Polyhedron nbh_diff, diff;
-    double vol_nbh_diff, vol_diff;
+    double vol_nbh_diff, vol_diff, vol_i, vol_j;
+    vol_i = computing_volume_of_nef_polyhedron(plh_i);
+    vol_j = computing_volume_of_nef_polyhedron(plh_j);
+    assert (vol_i > 0 && vol_j > 0);
     try
     {
         diff = plh_i - plh_j;
@@ -439,7 +442,7 @@ pair<double, int> computing_merging_cost_of_one_pair(
     if (vol_diff < vol_nbh_diff)
         return make_pair(vol_diff, -1);
     else
-        return make_pair(vol_nbh_diff, 1);
+        return make_pair((vol_i / vol_j) * vol_nbh_diff, 1);
 }
 
 double precomputing_merging_cost(
