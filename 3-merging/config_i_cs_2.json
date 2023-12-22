@@ -1,9 +1,12 @@
 {
-    "input_param_dir": "/media/y/18T/parallelism_2022/revision_exper/4-select_primary_normal_incline_roof_revision/sensitivity/coarse_segmentation/param/2.0/",
-    "root_output_param_dir": "/media/y/18T/parallelism_2022/revision_exper/4-select_primary_normal_incline_roof_revision/sensitivity/merge/param/2.0/",
-    "root_output_mesh_dir": "/media/y/18T/parallelism_2022/revision_exper/4-select_primary_normal_incline_roof_revision/sensitivity/merge/mesh/2.0/",
-    "root_output_union_dir": "/media/y/18T/parallelism_2022/revision_exper/4-select_primary_normal_incline_roof_revision/sensitivity/merge/union/2.0/",
-    "root_output_union_tri_dir": "/media/y/18T/parallelism_2022/revision_exper/4-select_primary_normal_incline_roof_revision/sensitivity/merge/union_tri/2.0/",
-    "log_dir": "/media/y/18T/parallelism_2022/revision_exper/4-select_primary_normal_incline_roof_revision/sensitivity/merge/log/2.0/",
-    "sample_num": 5
+    "input_param_dir": "/media/y/18T/parallelism_2022/exper_revision/4-select_primary_normal_incline_roof_revision/sensitivity/coarse_segmentation/param/2.0/",
+    "root_output_param_dir": "/media/y/18T/parallelism_2022/exper_revision/4-select_primary_normal_incline_roof_revision/sensitivity/merge_revision3_1/param/2.0/",
+    "root_output_mesh_dir": "/media/y/18T/parallelism_2022/exper_revision/4-select_primary_normal_incline_roof_revision/sensitivity/merge_revision3_1/mesh/2.0/",
+    "root_output_union_dir": "/media/y/18T/parallelism_2022/exper_revision/4-select_primary_normal_incline_roof_revision/sensitivity/merge_revision3_1/union/2.0/",
+    "root_output_union_tri_dir": "/media/y/18T/parallelism_2022/exper_revision/4-select_primary_normal_incline_roof_revision/sensitivity/merge_revision3_1/union_tri/2.0/",
+    "root_output_merging_cost_matrix_dir": "/media/y/18T/parallelism_2022/exper_revision/4-select_primary_normal_incline_roof_revision/sensitivity/merge_revision3_1/matrix/2.0/",
+    "root_output_mergedto_matrix_dir": "/media/y/18T/parallelism_2022/exper_revision/4-select_primary_normal_incline_roof_revision/sensitivity/merge_revision3_1/mergeto/2.0/",
+    "root_output_merging_in_out_dir": "/media/y/18T/parallelism_2022/exper_revision/4-select_primary_normal_incline_roof_revision/sensitivity/merge_revision3_1/inout/2.0/",
+    "log_dir": "/media/y/18T/parallelism_2022/exper_revision/4-select_primary_normal_incline_roof_revision/sensitivity/merge_revision3_1/log/2.0/",
+    "sample_names": "1 2 3 4 5"
 }
