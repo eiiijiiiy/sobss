@@ -1024,9 +1024,9 @@ void save_vol_param(
 }
 
 int main(int argc, char* argv[]){
-
+    string root_dir(argv[1]);
     rj::Document config_doc;
-    if (!read_config(argv[1], config_doc))
+    if (!read_config(argv[2], config_doc))
         return EXIT_FAILURE;
     
     string input_param_dir, 
@@ -1040,19 +1040,19 @@ int main(int argc, char* argv[]){
         sample_num = config_doc["sample_num"].GetInt();
 
     if (config_doc.HasMember("input_param_dir") && config_doc["input_param_dir"].IsString())
-        input_param_dir = config_doc["input_param_dir"].GetString();
+        input_param_dir = root_dir + config_doc["input_param_dir"].GetString();
     
     if (config_doc.HasMember("root_output_param_dir") && config_doc["root_output_param_dir"].IsString())
-        root_output_param_dir = config_doc["root_output_param_dir"].GetString();
+        root_output_param_dir = root_dir + config_doc["root_output_param_dir"].GetString();
     
     if (config_doc.HasMember("root_output_mesh_dir") && config_doc["root_output_mesh_dir"].IsString())
-        root_output_mesh_dir = config_doc["root_output_mesh_dir"].GetString();
+        root_output_mesh_dir = root_dir + config_doc["root_output_mesh_dir"].GetString();
     
     if (config_doc.HasMember("root_output_union_dir") && config_doc["root_output_union_dir"].IsString())
-        root_output_union_dir = config_doc["root_output_union_dir"].GetString();
+        root_output_union_dir = root_dir + config_doc["root_output_union_dir"].GetString();
     
     if (config_doc.HasMember("root_output_union_tri_dir") && config_doc["root_output_union_tri_dir"].IsString())
-        root_output_union_tri_dir = config_doc["root_output_union_tri_dir"].GetString();
+        root_output_union_tri_dir = root_dir + config_doc["root_output_union_tri_dir"].GetString();
     
     if (config_doc.HasMember("sample_names") && config_doc["sample_names"].IsString())
         sample_string = config_doc["sample_names"].GetString();
@@ -1064,13 +1064,13 @@ int main(int argc, char* argv[]){
         sample_names.push_back(sn);
     
     if (config_doc.HasMember("root_output_merging_cost_matrix_dir") && config_doc["root_output_merging_cost_matrix_dir"].IsString())
-        root_output_merging_cost_matrix_dir = config_doc["root_output_merging_cost_matrix_dir"].GetString();
+        root_output_merging_cost_matrix_dir = root_dir + config_doc["root_output_merging_cost_matrix_dir"].GetString();
     
     if (config_doc.HasMember("root_output_mergedto_matrix_dir") && config_doc["root_output_mergedto_matrix_dir"].IsString())
-        root_output_mergedto_matrix_dir = config_doc["root_output_mergedto_matrix_dir"].GetString();
+        root_output_mergedto_matrix_dir = root_dir + config_doc["root_output_mergedto_matrix_dir"].GetString();
     
     if (config_doc.HasMember("root_output_merging_in_out_dir") && config_doc["root_output_merging_in_out_dir"].IsString())
-        root_output_merging_in_out_dir = config_doc["root_output_merging_in_out_dir"].GetString();
+        root_output_merging_in_out_dir = root_dir + config_doc["root_output_merging_in_out_dir"].GetString();
 
 
     if (config_doc.HasMember("log_dir") && config_doc["log_dir"].IsString())
