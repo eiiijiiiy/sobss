@@ -73,23 +73,21 @@ else:
     # support_pts = [500, 1000]
 
 # params=['(0.33, 0.33, 0.33)', '(0.2, 0.2, 0.6)', '(0.1, 0.1, 0.8)', '(0.05, 0.05, 0.9)']
-params=['(0.33, 0.33, 0.33)']
+params=['0.5']
 
 this_type = '3-select_primary_normal_manhattan_revision' if args.t == 'm' else '4-select_primary_normal_incline_roof_revision'
 root_dir = "/media/y/B65F-12A0/yijie_revision_exper"
-# pcd_dir = '{}/{}/0-input'.format(root_dir, this_type)
-pcd_dir = '{}/{}/1-axisalign'.format(root_dir, this_type)
-poly_dir = '{}/{}/comparison/Polyfit_1/poly'.format(root_dir, this_type)
-tri_dir = '{}/{}/comparison/Polyfit_1/tri'.format(root_dir, this_type)
-tri_rb_dir = '{}/{}/comparison/Polyfit_1/tri_rb'.format(root_dir, this_type)
-r2s_dir = '{}/{}/comparison/Polyfit_1/r2s'.format(root_dir, this_type)
-s2r_dir = '{}/{}/comparison/Polyfit_1/s2r'.format(root_dir, this_type)
-rmsd_dir = '{}/{}/comparison/Polyfit_1/rmsd'.format(root_dir, this_type)
+pcd_dir = '{}/{}/0-input'.format(root_dir, this_type)
+# pcd_dir = '{}/{}/1-axisalign'.format(root_dir, this_type)
+tri_dir = '{}/{}/comparison/KSR_1/tri'.format(root_dir, this_type)
+tri_rb_dir = '{}/{}/comparison/KSR_1/tri_rb'.format(root_dir, this_type)
+r2s_dir = '{}/{}/comparison/KSR_1/r2s'.format(root_dir, this_type)
+s2r_dir = '{}/{}/comparison/KSR_1/s2r'.format(root_dir, this_type)
+rmsd_dir = '{}/{}/comparison/KSR_1/rmsd'.format(root_dir, this_type)
 
 names = [str(i+1) for i in range(sample_num)]
 
 for sp in support_pts:
-    sp_poly_dir = '{}/{}'.format(poly_dir, sp)
     sp_tri_dir = '{}/{}'.format(tri_dir, sp)
     sp_tri_rb_dir = '{}/{}'.format(tri_rb_dir, sp)
     sp_r2s_dir = '{}/{}'.format(r2s_dir, sp)
@@ -102,17 +100,8 @@ for sp in support_pts:
         for ni in range(sample_num):
             print("sample id {}".format(ni))
             n = names[ni]
-            poly_path = '{}/{}{}.obj'.format(sp_poly_dir, n, p)
-            tri_path = '{}/{}{}.obj'.format(sp_tri_dir, n, p)
-            tri_rb_path = '{}/{}{}.obj'.format(sp_tri_rb_dir, n, p)
-            if not os.path.exists(poly_path): continue
-            mesh = om.read_polymesh(poly_path)
-            if mesh.n_faces() == 0: continue
-
-            ms = pml.MeshSet()
-            ms.load_new_mesh(poly_path)
-            ms.meshing_poly_to_tri()
-            ms.save_current_mesh(tri_path)
+            tri_path = '{}/{}.ply'.format(sp_tri_dir, n)
+            tri_rb_path = '{}/{}.obj'.format(sp_tri_rb_dir, n)
 
             mesh = o3d.io.read_triangle_mesh(tri_path)
             tri_num = np.asarray(mesh.triangles).shape[0]
