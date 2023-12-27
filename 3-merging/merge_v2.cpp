@@ -681,22 +681,22 @@ double precomputing_merging_cost(
         //      << " with duration: " << duration.count()/1000000.0 << " sec" << endl;
     }
 
-    for (size_t i = 0; i < num_vol-1; i++)
-    {
-        for (size_t j = i+1; j < num_vol; j++)
-        {
-            if (merge_in_out(i, j) == -1 && merge_in_out(j, i) == 1)
-            {
-                merging_cost(j, i) = 1e7;
-                merge_in_out(j, i) = 0;
-            }
-            else if(merge_in_out(j, i) == -1 && merge_in_out(i, j) == 1)
-            {
-                merging_cost(i, j) = 1e7;
-                merge_in_out(i, j) = 0;
-            }
-        }
-    }
+    // for (size_t i = 0; i < num_vol-1; i++)
+    // {
+    //     for (size_t j = i+1; j < num_vol; j++)
+    //     {
+    //         if (merge_in_out(i, j) == -1 && merge_in_out(j, i) == 1)
+    //         {
+    //             merging_cost(j, i) = 1e7;
+    //             merge_in_out(j, i) = 0;
+    //         }
+    //         else if(merge_in_out(j, i) == -1 && merge_in_out(i, j) == 1)
+    //         {
+    //             merging_cost(i, j) = 1e7;
+    //             merge_in_out(i, j) = 0;
+    //         }
+    //     }
+    // }
 
     return total_volume;
 }
