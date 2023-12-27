@@ -351,7 +351,7 @@ bool is_possible_to_merge(
 }
 
 
-double computing_volume_of_nef_polyhedron(
+pair<double, double> computing_volume_of_nef_polyhedron(
     const Nef_Polyhedron& nef)
 {
     Mesh mesh;
@@ -382,17 +382,18 @@ double computing_volume_of_nef_polyhedron(
     catch(const std::exception& e)
     {
         cerr << "Failed to compute the volume!" << endl;
-        return 1e7;
+        return make_pair(1e7, 1e7);
     }
     if (bound_volume)
     {
         double volume = CGAL::to_double(PMP::volume(mesh));
-        return  volume; // merge j to i
+        double area = CGAL::to_double(PMP::area(mesh));
+        return  make_pair(volume, area); // merge j to i
     }
     else
     {
-        cerr << "Failed to compute the volume!" << endl;
-        return 1e7;
+        cerr << "Failed to compute the volume and area!" << endl;
+        return make_pair(1e7, 1e7);
     }
 }
 
@@ -404,18 +405,24 @@ pair<double, int> computing_merging_cost_of_one_pair(
     const Nef_Polyhedron& plh_merge)
 {
     Nef_Polyhedron nbh_diff, diff;
-    double vol_nbh_diff, vol_diff, vol_i, vol_j;
-    vol_i = computing_volume_of_nef_polyhedron(plh_i);
-    vol_j = computing_volume_of_nef_polyhedron(plh_j);
-    assert (vol_i > 0 && vol_j > 0);
+    double vol_nbh_diff, area_nbh_diff, vol_diff, vol_i, vol_j;
+    pair<double, double> vol_area_i = computing_volume_of_nef_polyhedron(plh_i);
+    pair<double, double> vol_area_j = computing_volume_of_nef_polyhedron(plh_j);
+    vol_i = vol_area_i.first;
+    vol_j = vol_area_j.first;
     try
     {
         diff = plh_i - plh_j;
 
         if (diff == Nef_Polyhedron::EMPTY)
+        {
             vol_diff = 0;
+        }
         else
-            vol_diff = computing_volume_of_nef_polyhedron(diff);
+        {
+            pair<double, double> vol_area_diff = computing_volume_of_nef_polyhedron(diff);
+            vol_diff = vol_area_diff.first;
+        }
     }
     catch(const std::exception& e)
     {
@@ -428,21 +435,28 @@ pair<double, int> computing_merging_cost_of_one_pair(
         nbh_diff = plh_merge - plh_nbh;
 
         if (nbh_diff == Nef_Polyhedron::EMPTY)
+        {
             vol_nbh_diff = 0;
-            
+        }
         else
-            vol_nbh_diff = computing_volume_of_nef_polyhedron(nbh_diff);
+        {
+            pair<double, double> vol_area_nbh_diff = computing_volume_of_nef_polyhedron(nbh_diff);
+            vol_nbh_diff = vol_area_nbh_diff.first;
+            area_nbh_diff = vol_area_nbh_diff.second;
+        }
+            
     }
     catch(const std::exception& e)
     {
         // CGAL::draw(new_vol);
         vol_nbh_diff = 1e7;
+        area_nbh_diff = 1e7;
     }
     
     if (vol_diff < vol_nbh_diff)
         return make_pair(vol_diff, -1);
     else
-        return make_pair((vol_i / vol_j) * vol_nbh_diff, 1);
+        return make_pair((vol_nbh_diff / area_nbh_diff) * (vol_i / vol_j) * vol_nbh_diff, 1);
 }
 
 double precomputing_merging_cost(
@@ -465,7 +479,9 @@ double precomputing_merging_cost(
     Nef_Polyhedron merged_n;
     cout << "begin to union all input volumes ... " << endl;
     size_t union_steps = tree_union(vol_n_polyhedra, merged_n);
-    double total_volume = computing_volume_of_nef_polyhedron(merged_n);
+    cout << "end to union all input volumes ... calculate the volume and surface area ... " << endl;
+    pair<double, double> vol_area = computing_volume_of_nef_polyhedron(merged_n);
+    double total_volume = vol_area.first;
     cout << "end union with total volume: " << total_volume << endl; 
     // preparing
     Eigen::VectorXd all_vol_vol(num_vol);
@@ -474,7 +490,6 @@ double precomputing_merging_cost(
     {
         vector<double> v = vol_params[i];
         all_vol_vol(i) = compute_volume_from_param(v);
-        // all_vol_vol(i) = computing_volume_of_nef_polyhedron(vol_n_polyhedra[i]);
         get_8pts_of_a_volume_from_param(v, all_8pts_vol[i]);
         min_allx(i) = all_8pts_vol[i].col(0).minCoeff();
         max_allx(i) = all_8pts_vol[i].col(0).maxCoeff();
@@ -1024,35 +1039,30 @@ void save_vol_param(
 }
 
 int main(int argc, char* argv[]){
-
+    string root_dir (argv[1]);
     rj::Document config_doc;
-    if (!read_config(argv[1], config_doc))
+    if (!read_config(argv[2], config_doc))
         return EXIT_FAILURE;
     
     string input_param_dir, 
            root_output_param_dir, root_output_mesh_dir, root_output_union_dir, root_output_union_tri_dir, 
            log_dir, sample_string,
            root_output_merging_cost_matrix_dir, root_output_mergedto_matrix_dir, root_output_merging_in_out_dir;
-           
-    int sample_num;
-
-    if (config_doc.HasMember("sample_num") && config_doc["sample_num"].IsInt())
-        sample_num = config_doc["sample_num"].GetInt();
 
     if (config_doc.HasMember("input_param_dir") && config_doc["input_param_dir"].IsString())
-        input_param_dir = config_doc["input_param_dir"].GetString();
+        input_param_dir = root_dir + config_doc["input_param_dir"].GetString();
     
     if (config_doc.HasMember("root_output_param_dir") && config_doc["root_output_param_dir"].IsString())
-        root_output_param_dir = config_doc["root_output_param_dir"].GetString();
+        root_output_param_dir = root_dir + config_doc["root_output_param_dir"].GetString();
     
     if (config_doc.HasMember("root_output_mesh_dir") && config_doc["root_output_mesh_dir"].IsString())
-        root_output_mesh_dir = config_doc["root_output_mesh_dir"].GetString();
+        root_output_mesh_dir = root_dir + config_doc["root_output_mesh_dir"].GetString();
     
     if (config_doc.HasMember("root_output_union_dir") && config_doc["root_output_union_dir"].IsString())
-        root_output_union_dir = config_doc["root_output_union_dir"].GetString();
+        root_output_union_dir = root_dir + config_doc["root_output_union_dir"].GetString();
     
     if (config_doc.HasMember("root_output_union_tri_dir") && config_doc["root_output_union_tri_dir"].IsString())
-        root_output_union_tri_dir = config_doc["root_output_union_tri_dir"].GetString();
+        root_output_union_tri_dir = root_dir + config_doc["root_output_union_tri_dir"].GetString();
     
     if (config_doc.HasMember("sample_names") && config_doc["sample_names"].IsString())
         sample_string = config_doc["sample_names"].GetString();
@@ -1064,24 +1074,23 @@ int main(int argc, char* argv[]){
         sample_names.push_back(sn);
     
     if (config_doc.HasMember("root_output_merging_cost_matrix_dir") && config_doc["root_output_merging_cost_matrix_dir"].IsString())
-        root_output_merging_cost_matrix_dir = config_doc["root_output_merging_cost_matrix_dir"].GetString();
+        root_output_merging_cost_matrix_dir = root_dir + config_doc["root_output_merging_cost_matrix_dir"].GetString();
     
     if (config_doc.HasMember("root_output_mergedto_matrix_dir") && config_doc["root_output_mergedto_matrix_dir"].IsString())
-        root_output_mergedto_matrix_dir = config_doc["root_output_mergedto_matrix_dir"].GetString();
+        root_output_mergedto_matrix_dir = root_dir + config_doc["root_output_mergedto_matrix_dir"].GetString();
     
     if (config_doc.HasMember("root_output_merging_in_out_dir") && config_doc["root_output_merging_in_out_dir"].IsString())
-        root_output_merging_in_out_dir = config_doc["root_output_merging_in_out_dir"].GetString();
+        root_output_merging_in_out_dir = root_dir + config_doc["root_output_merging_in_out_dir"].GetString();
 
 
     if (config_doc.HasMember("log_dir") && config_doc["log_dir"].IsString())
-        log_dir = config_doc["log_dir"].GetString();
+        log_dir = root_dir + config_doc["log_dir"].GetString();
     
     cout << "Grid search of three parameters [sigma, lambda]: "
          << "\t merging sigma: 0.25, 0.5, 1, 2, 4"  << endl
          << "\t merging lambda 0.125, 0.25, 0.5, 1, 2, 4, 8" << endl;
 
     cout << "configure directories and file paths:"
-         << "\t sample_num: " << sample_num << endl
          << "\t input_param_dir: " << input_param_dir << endl
          << "\t root_output_param_dir: " << root_output_param_dir << endl
          << "\t root_output_mesh_dir: " << root_output_mesh_dir << endl
