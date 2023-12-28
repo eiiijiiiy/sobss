@@ -1,12 +1,12 @@
 {
-    "input_param_dir": "/media/y/18T/parallelism_2022/exper_revision/4-select_primary_normal_incline_roof_revision/sensitivity/coarse_segmentation/param/0.5/",
-    "root_output_param_dir": "/media/y/18T/parallelism_2022/exper_revision/4-select_primary_normal_incline_roof_revision/sensitivity/merge_revision3_1/param/0.5/",
-    "root_output_mesh_dir": "/media/y/18T/parallelism_2022/exper_revision/4-select_primary_normal_incline_roof_revision/sensitivity/merge_revision3_1/mesh/0.5/",
-    "root_output_union_dir": "/media/y/18T/parallelism_2022/exper_revision/4-select_primary_normal_incline_roof_revision/sensitivity/merge_revision3_1/union/0.5/",
-    "root_output_union_tri_dir": "/media/y/18T/parallelism_2022/exper_revision/4-select_primary_normal_incline_roof_revision/sensitivity/merge_revision3_1/union_tri/0.5/",
-    "root_output_merging_cost_matrix_dir": "/media/y/18T/parallelism_2022/exper_revision/4-select_primary_normal_incline_roof_revision/sensitivity/merge_revision3_1/matrix/0.5/",
-    "root_output_mergedto_matrix_dir": "/media/y/18T/parallelism_2022/exper_revision/4-select_primary_normal_incline_roof_revision/sensitivity/merge_revision3_1/mergeto/0.5/",
-    "root_output_merging_in_out_dir": "/media/y/18T/parallelism_2022/exper_revision/4-select_primary_normal_incline_roof_revision/sensitivity/merge_revision3_1/inout/0.5/",
-    "log_dir": "/media/y/18T/parallelism_2022/exper_revision/4-select_primary_normal_incline_roof_revision/sensitivity/merge_revision3_1/log/0.5/",
+    "input_param_dir": "coarse_segmentation/param/0.5/",
+    "root_output_param_dir": "merge_revision3_1/param/0.5/",
+    "root_output_mesh_dir": "merge_revision3_1/mesh/0.5/",
+    "root_output_union_dir": "merge_revision3_1/union/0.5/",
+    "root_output_union_tri_dir": "merge_revision3_1/union_tri/0.5/",
+    "root_output_merging_cost_matrix_dir": "merge_revision3_1/matrix/0.5/",
+    "root_output_mergedto_matrix_dir": "merge_revision3_1/mergeto/0.5/",
+    "root_output_merging_in_out_dir": "merge_revision3_1/inout/0.5/",
+    "log_dir": "merge_revision3_1/log/0.5/",
     "sample_names": "1 2 3 4 5"
 }

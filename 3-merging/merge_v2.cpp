@@ -1074,7 +1074,7 @@ int main(int argc, char* argv[]){
 
 
     if (config_doc.HasMember("log_dir") && config_doc["log_dir"].IsString())
-        log_dir = config_doc["log_dir"].GetString();
+        log_dir = root_dir + config_doc["log_dir"].GetString();
     
     cout << "Grid search of three parameters [sigma, lambda]: "
          << "\t merging sigma: 0.25, 0.5, 1, 2, 4"  << endl
