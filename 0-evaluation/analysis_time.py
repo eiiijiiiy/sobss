@@ -65,7 +65,7 @@ merge_pre_time = np.zeros((m_sample_num + r_sample_num))
 merge_opt_time = np.zeros((m_sample_num + r_sample_num))
 merge_other_time = np.zeros((m_sample_num + r_sample_num))
 m_merge_log = np.loadtxt(
-    '{}/{}/sensitivity/merge/log/{:.1f}/sigma_{:.6f}_lambda_{:.6f}.txt'.format(
+    '{}/{}/sensitivity/merge_revision3_1/log/{:.1f}/sigma_{:.6f}_lambda_{:.6f}.txt'.format(
         root_dir, man, args.c1, args.s1, args.l1))
 merge_time[:m_sample_num] = np.sum(m_merge_log[:, :-3], axis=1)
 merge_pre_time[:m_sample_num] = m_merge_log[:, 1]
@@ -73,7 +73,7 @@ merge_opt_time[:m_sample_num] = m_merge_log[:, 2]
 merge_other_time[:m_sample_num] = np.sum(m_merge_log[:, [0,3,4]], axis=1)
 
 r_merge_log = np.loadtxt(
-    '{}/{}/sensitivity/merge/log/{:.1f}/sigma_{:.6f}_lambda_{:.6f}.txt'.format(
+    '{}/{}/sensitivity/merge_revision3_1/log/{:.1f}/sigma_{:.6f}_lambda_{:.6f}.txt'.format(
         root_dir, roof, args.c2, args.s2, args.l2))
 merge_time[m_sample_num:] = np.sum(r_merge_log[:, :-3], axis=1)
 merge_pre_time[m_sample_num:] = r_merge_log[:, 1]

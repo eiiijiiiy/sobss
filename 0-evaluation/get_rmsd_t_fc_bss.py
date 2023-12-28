@@ -44,9 +44,9 @@ else:
 vote_log = np.loadtxt('{}/{}/vs_0.250000.txt'.format(root_dir, t))
 cs_log = np.loadtxt(
     '{}/{}/sensitivity/coarse_segmentation/log/{}.txt'.format(root_dir, t, args.c))
-merge_log = np.loadtxt('{}/{}/sensitivity/merge/log/{}/sigma_{:.6f}_lambda_{:.6f}.txt'.format(root_dir, t, args.c, args.s, args.l))
-merge_rmsd = np.loadtxt('{}/{}/sensitivity/merge/rmsd/{}/sigma_{:.6f}_lambda_{:.6f}.txt'.format(root_dir, t, args.c, args.s, args.l))
-mesh_dir = '{}/{}/sensitivity/merge/union/{}/sigma_{:.6f}_lambda_{:.6f}'.format(root_dir, t, args.c, args.s, args.l)
+merge_log = np.loadtxt('{}/{}/sensitivity/merge_revision3_1/log/{}/sigma_{:.6f}_lambda_{:.6f}.txt'.format(root_dir, t, args.c, args.s, args.l))
+merge_rmsd = np.loadtxt('{}/{}/sensitivity/merge_revision3_1/rmsd/{}/sigma_{:.6f}_lambda_{:.6f}.txt'.format(root_dir, t, args.c, args.s, args.l))
+mesh_dir = '{}/{}/sensitivity/merge_revision3_1/union/{}/sigma_{:.6f}_lambda_{:.6f}'.format(root_dir, t, args.c, args.s, args.l)
 output_path = '{}/{}/sensitivity/param_sta_cs_{:1f}_sigma_{:6f}_lambda_{:6f}.txt'.format(root_dir, t, args.c, args.s, args.l)
 
 m_sample_num = 10
