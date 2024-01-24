@@ -7,7 +7,7 @@ Yijie Wu, Fan Xue*, Maosu Li, and Sou-Han Chen
 A novel Building Section Skeleton for compact 3D reconstruction from point clouds: A study of high-density urban scenes (Under review)
 ```
 # How to use
-## Stage-1
+## Stage 1
 ### Skeletonization
 - Build from source
 ```
