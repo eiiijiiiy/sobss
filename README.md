@@ -4,7 +4,7 @@ Compact building reconstruction based on Single-orientation Building Section Ske
 
 ```
 Yijie Wu, Fan Xue*, Maosu Li, and Sou-Han Chen
-A novel Building Section Skeleton for compact 3D reconstruction from point clouds: A study of high-density urban scenes (Under review)
+A novel Building Section Skeleton for compact 3D reconstruction from point clouds: A study of high-density urban scenes (In press)
 ```
 # How to use
 ## Stage 1
@@ -48,6 +48,8 @@ Data and results can be downloaded at [OneDrive](https://connecthkuhk-my.sharepo
 # TODO
 - [ ] clean the code
 - [ ] make the interface more user-friendly  
+    - [ ] call the cpp code in python
+    - [ ] update the results and tune the parameters in one open3d window (python)
 
 # Contacts
 
