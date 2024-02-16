@@ -99,7 +99,7 @@ int merge_bss_segms(
         size_t union_steps = tree_union(merged_vol_n_polyhedra, union_merged);
     
     // 6. save the result
-    string param_path = working_folder + "merged_vol_param.txt";
+    string param_path = working_folder + "bss_merged_segm.txt";
     save_vol_param(merged_vol_param, param_path);
 
     vector<Point_3> union_points_tri;
@@ -110,7 +110,7 @@ int merge_bss_segms(
             union_merged, union_points_tri, union_polygons_tri, true);
     }
 
-    string obj_path = working_folder + "merged_vol.obj";
+    string obj_path = working_folder + "bss_merged_vol.obj";
     save_vol_8pts_as_obj(merged_vol_8pts, obj_path);
     string union_tri_path = working_folder + "bss_merged_tri.obj";
     CGAL::IO::write_OBJ(union_tri_path, union_points_tri, union_polygons_tri);
