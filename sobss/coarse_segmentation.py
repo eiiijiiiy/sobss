@@ -182,7 +182,7 @@ def B_divide(im, grad_h, grad_w, c_t, h_b, w_b):
 
 def coarse_segment(working_folder):
     pcd_path = os.path.join(working_folder, "bss_atom.txt")
-    conf_path = os.path.join(working_folder, "conf.json")
+    conf_path = os.path.join(working_folder, "config.json")
     options = json.load(open(conf_path))
     
     ps = options['ps'] if 'ps' in options else 2
@@ -352,16 +352,16 @@ def coarse_segment(working_folder):
         #     np.savetxt("{}/{}.txt".format(group_dir, n), group_pt_sta, fmt="%i")
         print("rect count {} im pt count {} pcd point num {} ".format(rect_count, vote_count, pcd.shape[0]))
 
-        # fill holes
-        # speed test, comment the output
-        boxes = np.asarray(boxes).reshape((-1, 8))
-        other_solids = np.asarray(other_solids).reshape((-1, 8))
-        volumes = np.vstack((boxes, other_solids))
+    # fill holes
+    # speed test, comment the output
+    boxes = np.asarray(boxes).reshape((-1, 8))
+    other_solids = np.asarray(other_solids).reshape((-1, 8))
+    volumes = np.vstack((boxes, other_solids))
 
-        volume_mesh_path = os.path.join(working_folder, "bss_coarse_segm.obj")
-        create_vol_mesh_from_params(
-            volumes[:, :-1], volume_mesh_path)
-        
-        volume_param_path = os.path.join(working_folder, "bss_coarse_segm.txt")
-        np.savetxt(volume_param_path, volumes, fmt = "%.3f")
+    volume_mesh_path = os.path.join(working_folder, "bss_coarse_segm.obj")
+    create_vol_mesh_from_params(
+        volumes[:, :-1], volume_mesh_path)
+    
+    volume_param_path = os.path.join(working_folder, "bss_coarse_segm.txt")
+    np.savetxt(volume_param_path, volumes, fmt = "%.3f")
     

@@ -5,7 +5,7 @@
 int merge_bss_segms(
     const string working_folder) 
 {
-    string bss_segm_path = working_folder + "/bss_segm.txt";
+    string bss_segm_path = working_folder + "/bss_coarse_segm.txt";
     
     if (!filesystem::exists(bss_segm_path))
     {
@@ -63,7 +63,7 @@ int merge_bss_segms(
             num_box ++;
     }
     num_vol = input_vol_params.size();
-
+    cout << num_vol << " volumes to merge! \n";
     // 2. precompute
     Eigen::MatrixXd merging_cost(num_vol, num_vol+1);
     Eigen::MatrixXi merge_in_out(num_vol, num_vol);

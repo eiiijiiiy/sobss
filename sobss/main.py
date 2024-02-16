@@ -46,12 +46,12 @@ def parse_bss_segm(path):
     segm_coords[:, 3, :] = np.vstack(
 	    [X_RIGHT, segms[:, 1], Z_BTM]).transpose()  # RB 3
     
-    segm_edge_conn = np.array(
+    segm_edge_conn = np.array((
         [0, 1], # LT-RT
         [1, 3], # RT-RB
         [3, 2], # RB-LB
         [2, 0]  # LB-LT
-        ).reshape((1, 4, 2))
+        )).reshape((1, 4, 2))
 
     segm_edges = np.repeat(segm_edge_conn, num, axis=0) # shape: num, 4, 2
     shift = (np.arange(num) * 4).reshape((num, 1))
@@ -84,7 +84,7 @@ def parse_bss_segm(path):
     vol_coords[:, 7, :] = np.vstack(
 	    [X_RIGHT, Y_BACK_BTM, Z_BTM]).transpose()  # BRB 7
     
-    vol_edge_conn = np.array(
+    vol_edge_conn = np.array((
         [0, 1], # FLT-FRT
         [1, 5], # FRT-BRT
         [5, 4], # BRT-BLT
@@ -97,7 +97,7 @@ def parse_bss_segm(path):
         [1, 3], # FRT-FRB
         [4, 6], # BLT-BLB
         [5, 7]  # BRT-BRB
-        ).reshape((1, 12, 2))
+        )).reshape((1, 12, 2))
 
     vol_edges = np.repeat(vol_edge_conn, num, axis=0) # shape: num, 12, 2
     shift = (np.arange(num) * 8).reshape((num, 1))
@@ -115,10 +115,10 @@ def parse_bss_segm(path):
 def initialize_working_folder(working_folder):
     if os.path.exists(working_folder):
         shutil.rmtree(working_folder)
-    os.makedir(working_folder)
+    os.makedirs(working_folder)
 
     params = {
-        'voxel_size': 2.0, 
+        'voxel_size': 0.25, 
         'ps': 2.0,
         'dxi': 2.0,
         'xi': 2.0,
@@ -139,7 +139,7 @@ def actions(pcd_path, working_folder):
     NH_NAME = "aligned non-horizontal pcd"
     BSS_ATOM_NAME = "BSS atoms"
     BSS_COARSE_SEGM_NAME = "BSS coarse segm"
-    BSS_COARSE_VOLUME_NAME = "BSS coarse segm"
+    BSS_COARSE_VOLUME_NAME = "BSS coarse volume"
     BSS_MERGED_SEGM_NAME = "BSS merged segm"
     BSS_MERGED_VOLUME_NAME = "BSS merged volume"
     BSS_MERGED_TRI_MESH_NAME = "BSS merged mesh (tri)"
@@ -178,6 +178,9 @@ def actions(pcd_path, working_folder):
         bss_atom.points = o3d.utility.Vector3dVector(bss_atom_pts)
 
         o3dvis.add_geometry({"name": BSS_ATOM_NAME, "geometry": bss_atom})
+        # view_ctl = o3dvis.get_view_control()
+        # view_ctl.set_lookat([0, 0, 0])
+        # view_ctl.set_front([0, 0, 1])
     
     def coarse_segment(o3dvis):        
         cs.coarse_segment(working_folder)
@@ -192,7 +195,7 @@ def actions(pcd_path, working_folder):
         working_folder_c = ctypes.create_string_buffer(
                     working_folder.encode('utf-8'))
         
-        sobss_lib.merge_segments(working_folder_c)
+        sobss_lib.merge(working_folder_c)
 
         bss_merged_segm_path = os.path.join(working_folder, "bss_merged_segm.txt")
         bss_merged_segm, bss_merged_volume = parse_bss_segm(bss_merged_segm_path)

@@ -211,10 +211,12 @@ int dfo_solve(
         nlopt::result result = opt.optimize(x, minf);
         ori_pcd.orientation = x[0];
         cout << "optimized \n";
+        return EXIT_SUCCESS;
     }
     catch(exception &e) 
     {
         cout << "NLOpt failed: " << e.what() << endl;
+        return EXIT_FAILURE;
     }
 }
 
@@ -255,17 +257,16 @@ double EstimateHorizontalOrientation(
     cout << "Orientation pcd initiated." << endl;
 
     // solve
-    int result = dfo_solve(ori_pcd);
-    if (result < 0)
-    {
-        cerr << "Error: DFO failed " << endl;
-        return -100.0;
-    }
-    else
+    if (dfo_solve(ori_pcd) == EXIT_SUCCESS)
     {
         cout << "DFO succeeded" << endl;
         double orientation = ori_pcd.orientation;
         return orientation;
+    }
+    else
+    {
+        cerr << "Error: DFO failed " << endl;
+        return -100.0;
     }
 }
 
@@ -702,6 +703,7 @@ void gen_all_meshes(
             create_polyhedron_for_a_volume(v, p);
             Nef_Polyhedron n(p);
             vol_n_polyhedra.push_back(n);
+            cout << "created " << vid << "th volume!" << endl;
             vid ++;
         }
     }
