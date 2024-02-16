@@ -9,8 +9,8 @@ import argparse
 import json
 import coarse_segmentation as cs
 
-sobss_lib = ctypes.cdll.LoadLibrary("build/libsobss.so")
-
+sobss_lib = ctypes.cdll.LoadLibrary("build/libsobss.dylib")
+# sobss_lib = ctypes.cdll.LoadLibrary("build/libsobss.so")
 
 def parse_bss_segm(path):
     # 0 x, 1 y, 2 z, 3 width, 4 height (of front/back face), 
@@ -168,6 +168,8 @@ def actions(pcd_path, working_folder):
         bss_atom.points = o3d.utility.Vector3dVector(bss_atom_pts)
 
         o3dvis.add_geometry({"name": BSS_ATOM_NAME, "geometry": bss_atom})
+        o3dvis.setup_camera(45, np.array([0,0,0]), np.array([0, 0, 30]), np.array([0,0,1]))
+        o3dvis.post_redraw()
         # view_ctl = o3dvis.get_view_control()
         # view_ctl.set_lookat([0, 0, 0])
         # view_ctl.set_front([0, 0, 1])
