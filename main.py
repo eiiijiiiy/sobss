@@ -219,10 +219,10 @@ def actions(pcd_path, working_folder):
         "name": INPUT_NAME,
         "geometry": input_pcd}
         ],
-        actions=[("Skeletonize (collect bss atoms)", skeletonize),
+        actions=[("Skeletonize", skeletonize),
                 ("Coarse segment", coarse_segment),
-                ("Merge segments", merge_segments),
-                ("Evaluate merged segments", evaluate_merged_segments)
+                ("Merge", merge_segments),
+                ("Evaluate", evaluate_merged_segments)
                 ])
 
 parser = argparse.ArgumentParser()
