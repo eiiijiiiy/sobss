@@ -12,7 +12,7 @@ int merge_bss_segms(
         return EXIT_FAILURE;
     }
     
-    filesystem::path conf_path = fileseystem::path(working_folder) / fileseystem::path("config.json");
+    filesystem::path conf_path = filesystem::path(working_folder) / filesystem::path("config.json");
     if (!filesystem::exists(conf_path.string()))
     {
         cerr << "no config.json in " << working_folder << endl;
@@ -98,7 +98,7 @@ int merge_bss_segms(
         size_t union_steps = tree_union(merged_vol_n_polyhedra, union_merged);
     
     // 6. save the result
-    filesystem::param_path = filesystem::path(working_folder) / filesystem::path("bss_merged_segm.txt");
+    filesystem::path param_path = filesystem::path(working_folder) / filesystem::path("bss_merged_segm.txt");
     save_vol_param(merged_vol_param, param_path.string());
 
     vector<Point_3> union_points_tri;
