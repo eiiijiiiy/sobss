@@ -15,7 +15,7 @@ sobss_lib = ctypes.cdll.LoadLibrary("build/libsobss.so")
 def parse_bss_segm(path):
     # 0 x, 1 y, 2 z, 3 width, 4 height (of front/back face), 
     # 5 radius, 6 length of the horizontal normals (default normals point to the (0,1,0))
-    segms = np.loadtxt(path)[:, :-1]
+    segms = np.loadtxt(path)
     num = segms.shape[0]
     NV = np.sqrt(1 - segms[:, -1] ** 2)
     Z_TOP = segms[:, 2] + segms[:, 5] * \

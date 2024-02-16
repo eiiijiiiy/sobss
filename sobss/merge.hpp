@@ -56,7 +56,7 @@ int merge_bss_segms(
         copy(istream_iterator<double>(iss),
             istream_iterator<double>(),
             back_inserter(v));
-        assert(v.size() == 8);
+        assert(v.size() == 7);
         input_vol_params.push_back(v);
         if (v[6] == 1)
             num_box ++;

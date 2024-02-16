@@ -363,5 +363,5 @@ def coarse_segment(working_folder):
         volumes[:, :-1], volume_mesh_path)
     
     volume_param_path = os.path.join(working_folder, "bss_coarse_segm.txt")
-    np.savetxt(volume_param_path, volumes, fmt = "%.3f")
+    np.savetxt(volume_param_path, volumes[:, :-1], fmt = "%.3f")
     
