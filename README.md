@@ -9,38 +9,34 @@ ISPRS Journal of Photogrammetry and Remote Sensing 209, 85-100.
 ```
 
 # How to use
-## Stage 1
-### Skeletonization
-- Build from source
+## Dependencies
+- [open3d](https://www.open3d.org/)
+- [cgal](https://www.cgal.org/)
+- [nlopt](https://nlopt.readthedocs.io/)
+- [eigen](https://eigen.tuxfamily.org/)
+- [xtensor](https://github.com/xtensor-stack/xtensor)
+- [gurobi](https://www.gurobi.com/)
+- [openmp](https://www.openmp.org/)
+- [rapidjson](https://rapidjson.org/)
+## Build from source
 ```
-cd 1-skeletonization
-mkdir build
-cd build
-cmake ..
-make 
-```
-- Run with a configuration file
-```
-./vote [insert configuration path here]
-```
-### Coarse segmentation
-```
-cd 2-coarse_segmentation
-python main.py 
-```
-## Stage 2
-- Build from source
-```
-cd 3-merging
+git clone https://github.com/eiiijiiiy/sobss.git
+cd sobss
 mkdir build
 cd build
 cmake ..
 make
 ```
-- Run with a configuration file
+## Run the gui
 ```
-./merge [insert configuration path here]
+cd ../
+python main.py -i <path to the input point cloud *.ply> -w <directory for saving the results>
 ```
+click the buttons `skeletonize`->`coarse segment`-> `merge`->`evaluate`. Results will be shown in the open3d window.
+
+## Tested OS
+- Ubuntu 20.04 LTS.
+
 # Test data and results
 Data and results can be downloaded at [OneDrive](https://connecthkuhk-my.sharepoint.com/:f:/g/personal/yijiewu_connect_hku_hk/Ej77MEfWVCtLrJVM-27fO40Brt0B5MLBiAErMaX3p0M3YQ?e=2cHrAg): 
 - Inputs: 15 scenes tested in the paper can be found in 0-input. 
@@ -49,9 +45,9 @@ Data and results can be downloaded at [OneDrive](https://connecthkuhk-my.sharepo
 
 # TODO
 - [ ] clean the code
-- [ ] make the interface more user-friendly  
-    - [ ] call the cpp code in python
-    - [ ] update the results and tune the parameters in one open3d window (python)
+- [x] make the interface more user-friendly  
+    - [x] call the cpp code in python
+    - [x] update the results and tune the parameters in one open3d window (python)
 
 # Contacts
 
