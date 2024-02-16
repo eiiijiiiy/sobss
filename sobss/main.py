@@ -8,9 +8,16 @@ import ctypes
 import argparse
 import json
 import coarse_segmentation as cs
+import platform
 
-sobss_lib = ctypes.cdll.LoadLibrary("build/libsobss.dylib")
-# sobss_lib = ctypes.cdll.LoadLibrary("build/libsobss.so")
+if platform.system() == "Darwin:
+    sobss_lib = ctypes.cdll.LoadLibrary("build/libsobss.dylib")
+elif platform.system() == "Linux":
+    sobss_lib = ctypes.cdll.LoadLibrary("build/libsobss.so")
+elif platform.system() == "WINdows":
+    sobss_lib = ctypes.cdll.LoadLibrary("build/sobss.dll")
+else:
+    raise Exception("Unsupported platform: {}".format(platform.system()))
 
 def parse_bss_segm(path):
     # 0 x, 1 y, 2 z, 3 width, 4 height (of front/back face), 
