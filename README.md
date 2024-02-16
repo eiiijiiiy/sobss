@@ -39,9 +39,9 @@ click the buttons `skeletonize`->`coarse segment`-> `merge`->`evaluate`. Results
 
 # Test data and results
 Data and results can be downloaded at [OneDrive](https://connecthkuhk-my.sharepoint.com/:f:/g/personal/yijiewu_connect_hku_hk/Ej77MEfWVCtLrJVM-27fO40Brt0B5MLBiAErMaX3p0M3YQ?e=2cHrAg): 
-- Inputs: 15 scenes tested in the paper can be found in 0-input. 
-- Results: Reconstructed results are in 2-union_tri(results). 
-- Evaluation: Inputs colorized in terms of the distances to the results are in 3-r2s(evaluation).
+- Inputs: 15 scenes tested in the paper can be found in `0-input`. 
+- Results: Reconstructed results are in `2-union_tri(results)`. 
+- Evaluation: Inputs colorized in terms of the distances to the results are in `3-r2s(evaluation)`.
 
 # TODO
 - [ ] clean the code
