@@ -15,7 +15,8 @@ void skeletonize(const char * pcd_path, const char * working_folder)
 void merge(const char * working_folder)
 {
     cout << "begin to merge bss segms ... \n";
-    merge_bss_segms(working_folder);
+    string working_folder_str(working_folder);
+    merge_bss_segms(working_folder_str);
     cout << "bss segms merged! \n";
 }
 

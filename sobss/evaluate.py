@@ -1,4 +1,5 @@
 import numpy as np
+from matplotlib import pyplot as plt
 import open3d as o3d
 import geopandas
 from tqdm import tqdm

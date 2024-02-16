@@ -1,3 +1,5 @@
+# pragma once
+
 #include "util.hpp"
 
 int merge_bss_segms(
@@ -5,14 +7,14 @@ int merge_bss_segms(
 {
     string bss_segm_path = working_folder + "/bss_segm.txt";
     
-    if (!boost::filesystem::exists(bss_segm_path))
+    if (!filesystem::exists(bss_segm_path))
     {
         cerr << "no bss_segm.txt in " << working_folder << endl;
         return EXIT_FAILURE;
     }
     
     string conf_path = working_folder + "/config.json";
-    if (!boost::filesystem::exists(conf_path))
+    if (!filesystem::exists(conf_path))
     {
         cerr << "no config.json in " << working_folder << endl;
         return EXIT_FAILURE;

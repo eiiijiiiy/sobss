@@ -1,16 +1,18 @@
+# pragma once
+
 #include "util.hpp"
 
 int collect_bss_atoms(
     const string pcd_path, 
     const string working_folder) 
 {
-    // rj::Document config_doc;
+    rj::Document config_doc;
     string conf_path = working_folder + "/config.json";
     if (!read_config(conf_path.c_str(), config_doc))
         return EXIT_FAILURE;
     
     double voxel_size;
-    if (conf_doc.HasMember("voxel_size") && conf_doc["voxel_size"].IsDouble())
+    if (config_doc.HasMember("voxel_size") && config_doc["voxel_size"].IsDouble())
         voxel_size = config_doc["voxel_size"].GetDouble();
     else
     {
@@ -41,16 +43,16 @@ int collect_bss_atoms(
            v_z_thresh = 0.5;
     int half_PI_bin_num = 100, 
         max_iter = 100;
-    vector<EnumNormalGroup> normal_labels(input_pcd->points_.size(), EnumNormalGroup::other);
+    vector<EnumNormalGroup> normal_labels(in_pcd->points_.size(), EnumNormalGroup::other);
     PointCloud h_pcd, nh_pcd;
-    pair<shared_ptr<PointCloud>, shared_ptr<PointCloud>> result = ClusterPointNormals(
-        *input_pcd, h_pcd, nh_pcd, normal_labels, h_z_thresh, v_z_thresh);
+    ClusterPointNormals(
+        *in_pcd, h_pcd, nh_pcd, normal_labels, h_z_thresh, v_z_thresh);
 
     // 4. estimate the primary horizontal orientation
     double orientation = EstimateHorizontalOrientation(nh_pcd, half_PI_bin_num, max_iter);
     Eigen::AngleAxisd angle_axis(-orientation, Eigen::Vector3d(0,0,1));
     Eigen::Matrix3d rot_matrix = angle_axis.toRotationMatrix();
-    Eigen::Vector3d rot_center = input_pcd->GetCenter();
+    Eigen::Vector3d rot_center = in_pcd->GetCenter();
     in_pcd->Rotate(rot_matrix, rot_center);
     nh_pcd.Rotate(rot_matrix, rot_center);
 
@@ -75,7 +77,7 @@ int collect_bss_atoms(
     if (selected_normal_id>0){
         Eigen::AngleAxisd angle_axis(M_PI/2, Eigen::Vector3d(0,0,1));
         Eigen::Matrix3d rot_matrix = angle_axis.toRotationMatrix();
-        Eigen::Vector3d rot_center = non_horizontal_pcd->GetCenter();
+        Eigen::Vector3d rot_center = in_pcd->GetCenter();
         in_pcd->Rotate(rot_matrix, rot_center);
         nh_pcd.Rotate(rot_matrix, rot_center);
         cout << "* rotated the align the primary normal with (1, 0, 0)" << endl;

@@ -30,9 +30,53 @@
 #include <xtensor/xindex_view.hpp>
 #include <xtensor/xmath.hpp>
 
+//Open3d includes
+#include <open3d/geometry/PointCloud.h>
+#include <open3d/geometry/TriangleMesh.h>
+#include <open3d/geometry/Octree.h>
+#include <open3d/io/PointCloudIO.h>
+#include <open3d/io/TriangleMeshIO.h>
+#include <open3d/geometry/BoundingVolume.h>
+#include <open3d/geometry/KDTreeFlann.h>
+#include <open3d/utility/Eigen.h>
+#include <open3d/utility/Helper.h>
+#include <open3d/utility/Console.h>
+#include <open3d/visualization/utility/DrawGeometry.h>
+#include <open3d/visualization/utility/ColorMap.h>
+
+// gurobi includes
+#include <gurobi_c++.h>
+
+// CGAL includes
+#include <CGAL/Exact_predicates_exact_constructions_kernel.h>
+#include <CGAL/Surface_mesh.h>
+#include <CGAL/Polygon_mesh_processing/corefinement.h>
+#include <CGAL/Polygon_mesh_processing/repair_self_intersections.h>
+#include <CGAL/Polygon_mesh_processing/repair_degeneracies.h>
+#include <CGAL/Polygon_mesh_processing/polygon_soup_to_polygon_mesh.h>
+#include <CGAL/Polygon_mesh_processing/polygon_mesh_to_polygon_soup.h>
+#include <CGAL/Polygon_mesh_processing/orient_polygon_soup_extension.h>
+#include <CGAL/Polygon_mesh_processing/measure.h>
+#include <CGAL/Polygon_mesh_processing/IO/polygon_mesh_io.h>
+#include <CGAL/Nef_polyhedron_3.h>
+#include <CGAL/Polyhedron_3.h>
+#include <CGAL/draw_polyhedron.h>
+#include <CGAL/draw_nef_3.h>
+#include <CGAL/boost/graph/convert_nef_polyhedron_to_polygon_mesh.h>
+#include <CGAL/IO/polygon_soup_io.h>
+#include <CGAL/Surface_mesh.h>
+#include <CGAL/Polygon_mesh_processing/remesh.h>
+#include <CGAL/Polygon_mesh_processing/border.h>
+#include <boost/iterator/function_output_iterator.hpp>
+
+// openmp includes
+#include <omp.h>
+
+// eigen includes
+#include <Eigen/Dense>
+
 using namespace std;
 namespace rj = rapidjson;
-namespace fs = filesystem;
 
 
 enum EnumNormalGroup {horizontal=0, non_horizontal=1, other=2}; // normal group
@@ -45,8 +89,46 @@ typedef open3d::geometry::OctreeNodeInfo            OctreeNodeInfo;
 typedef open3d::geometry::OctreeLeafNode            OctreeLeafNode;
 typedef open3d::geometry::OctreePointColorLeafNode  OctreePointColorLeafNode;
 
+typedef CGAL::Exact_predicates_exact_constructions_kernel     K;
+typedef K::Point_3                                            Point_3;
+typedef K::Vector_3                                           Vector_3;
+typedef CGAL::Surface_mesh<Point_3>                           Mesh;
+typedef CGAL::Polyhedron_3<K>                                 Polyhedron;
+typedef CGAL::Nef_polyhedron_3<K>                             Nef_Polyhedron;
+typedef Mesh::Vertex_index                                    vertex_descriptor;
+typedef Mesh::Face_index                                      face_descriptor;
+typedef boost::graph_traits<Mesh>::halfedge_descriptor        halfedge_descriptor;
+typedef boost::graph_traits<Mesh>::edge_descriptor            edge_descriptor;
 
-// group vertical and horizontal normals
+namespace PMP = CGAL::Polygon_mesh_processing;
+
+
+bool read_config(
+    const char* path, 
+    rj::Document& config_doc)
+{
+    FILE *config_fp = fopen(path, "rb");
+
+    if (!config_fp)
+    {
+        cerr << "Error: unable to open argv[1]" << endl;
+        return false;
+    }
+
+    char config_readBuffer[65536];
+    rj::FileReadStream config_is(config_fp, config_readBuffer,
+                                 sizeof(config_readBuffer));
+    config_doc.ParseStream(config_is);
+    if (config_doc.HasParseError())
+    {
+        cerr << "Error: failed to parse JSON document" << endl;
+        fclose(config_fp);
+        return false;
+    }
+    fclose(config_fp);
+    return true;
+}
+
 void ClusterPointNormals(
     const PointCloud& pcd, 
     PointCloud& h_pcd,
@@ -55,17 +137,14 @@ void ClusterPointNormals(
     double h_z_thresh, 
     double v_z_thresh)
 { 
-    h_pcd.clear();
-    nh_pcd.clear();
+    h_pcd.Clear();
+    nh_pcd.Clear();
 
     for (size_t i = 0; i < pcd.points_.size(); i++) {
         if (abs(pcd.normals_[i][2]) >= h_z_thresh) {
             labels[i] = EnumNormalGroup::horizontal;
             h_pcd.points_.push_back(pcd.points_[i]);
             h_pcd.normals_.push_back(pcd.normals_[i]);
-            
-            if (with_color)
-                horizontal_pcd.colors_.push_back(pcd.colors_[i]);
         }
         else if ((abs(pcd.normals_[i][2]) <= v_z_thresh) ||
                     (pcd.normals_[i][2] > 0)){
@@ -106,7 +185,7 @@ typedef struct{
 static double evaluate_nlopt (const vector<double> &x, vector<double> &grad, void *data)
 {
     OrientationPcd* ori_pcd = (OrientationPcd*) data;
-    ori_pcd->variables = x[0];
+    ori_pcd->orientation = x[0];
     return ori_pcd->evaluate();
 }
 
@@ -140,7 +219,7 @@ int dfo_solve(
 }
 
 
-double EstimatePrimaryHorizontalOrientation(
+double EstimateHorizontalOrientation(
                     PointCloud &vertical_pcd,
                     int half_PI_bin_num,
                     int max_iter = 100){
@@ -186,19 +265,7 @@ double EstimatePrimaryHorizontalOrientation(
     {
         cout << "DFO succeeded" << endl;
         double orientation = ori_pcd.orientation;
-        size_t o_count = 0, oo_count = 0;
-        Eigen::Vector2f ori_vec = Eigen::Vector2f(cos(orientation), sin(orientation));
-        for (size_t i = 0; i < num_point; i++)
-        {
-            Eigen::Vector2f horizontal_normal = Eigen::Vector2f(vertical_pcd.normals_[i][0], 
-                                    vertical_pcd.normals_[i][1]).normalized();
-    
-            if (abs(horizontal_normal.dot(ori_vec)) > 0.5)
-                o_count++;
-            else
-                oo_count++;
-        }
-        return orientation + M_PI/2;
+        return orientation;
     }
 }
 
@@ -520,6 +587,349 @@ void fast_vote(
     open3d::io::WritePointCloud(output_voted_center_pcd_path, voted_center_pcd);
     cout << "* saved solid voted centers to " << output_voted_center_pcd_path << endl;
     cout << "* saved solid voted params to " << output_voted_param_path << endl;
+}
+
+
+void get_8pts_of_a_volume_from_param(
+    const vector<double>& param,
+    Eigen::MatrixXd& matrix_8pts)
+{
+    matrix_8pts.resize(8, 3);
+    double nv = sqrt(1 - param[6] * param[6]);
+    double z_top = param[2] + param[5] * nv + param[4] * param[6] / 2;
+    double z_btm = param[2] + param[5] * nv - param[4] * param[6] / 2;
+    double y_front_top = param[1] + param[5] * param[6] - param[4] / 2 * nv;
+    double y_front_btm = param[1] + param[5] * param[6] + param[4] / 2 * nv;
+    double y_back_top = param[1] - param[5] * param[6] + param[4] / 2 * nv;
+    double y_back_btm = param[1] - param[5] * param[6] - param[4] / 2 * nv;
+    double x_right = param[0] + param[3] / 2;
+    double x_left = param[0] - param[3] / 2;
+
+    // flt
+    matrix_8pts.row(0) = Eigen::Vector3d(x_left, y_front_top, z_top).transpose(); 
+    // frt
+    matrix_8pts.row(1) = Eigen::Vector3d(x_right, y_front_top, z_top).transpose();
+    // flb
+    matrix_8pts.row(2) = Eigen::Vector3d(x_left, y_front_btm, z_btm).transpose();
+    // frb
+    matrix_8pts.row(3) = Eigen::Vector3d(x_right, y_front_btm, z_btm).transpose();
+    // blt
+    matrix_8pts.row(4) = Eigen::Vector3d(x_left, y_back_top, z_top).transpose();
+    // brt
+    matrix_8pts.row(5) = Eigen::Vector3d(x_right, y_back_top, z_top).transpose();
+    // blb
+    matrix_8pts.row(6) = Eigen::Vector3d(x_left, y_back_btm, z_btm).transpose();
+    // brb
+    matrix_8pts.row(7) = Eigen::Vector3d(x_right, y_back_btm, z_btm).transpose();
+}
+
+typename Polyhedron::Halfedge_handle create_polyhedron_for_a_volume(
+    const vector<double> &v, 
+    Polyhedron & P){
+    // based on the example from CGAL documentation: 
+    // https://doc.cgal.org/latest/Polyhedron/index.html#PolyhedronExampleUsingEulerOperatorstoBuild
+
+    // v: 0 x, 1 y, 2 z, 3 width, 4 height, 5 radius, 6 length of horizontal normal
+    double nv = sqrt(1 - v[6] * v[6]);
+    double z_top = v[2] + v[5] * nv + v[4] * v[6] / 2;
+    double z_btm = v[2] + v[5] * nv - v[4] * v[6] / 2;
+    double y_front_top = v[1] + v[5] * v[6] - v[4] / 2 * nv;
+    double y_front_btm = v[1] + v[5] * v[6] + v[4] / 2 * nv;
+    double y_back_top = v[1] - v[5] * v[6] + v[4] / 2 * nv;
+    double y_back_btm = v[1] - v[5] * v[6] - v[4] / 2 * nv;
+    double x_right = v[0] + v[3] / 2;
+    double x_left = v[0] - v[3] / 2;
+
+    CGAL_precondition(P.is_valid());
+    typedef typename Polyhedron::Point_3         Point;
+    typedef typename Polyhedron::Halfedge_handle Halfedge_handle;
+
+    Point flt = Point(x_left, y_front_top, z_top);
+    Point frt = Point(x_right, y_front_top, z_top);
+    Point flb = Point(x_left, y_front_btm, z_btm);
+    Point frb = Point(x_right, y_front_btm, z_btm);
+
+    Point blt = Point(x_left, y_back_top, z_top);
+    Point brt = Point(x_right, y_back_top, z_top);
+    Point blb = Point(x_left, y_back_btm, z_btm);
+    Point brb = Point(x_right, y_back_btm, z_btm);
+
+    Halfedge_handle h = P.make_tetrahedron(brb, blt, blb, flb);
+    Halfedge_handle g = h->next()->opposite()->next();             // Fig. (a)
+
+    if (abs(y_front_top - y_back_top) > 0.01)
+    {
+        // cout << "y_front_top: " << y_front_top << ", y_back_top: " << y_back_top << endl;
+        // cout << "normal case." << endl;
+        
+        P.split_edge(h->next());
+        P.split_edge(g->next());
+        P.split_edge(g);                                              // Fig. (b)
+        h->next()->vertex()->point()     = brt;
+        g->next()->vertex()->point()     = flt;
+        g->opposite()->vertex()->point() = frb;                        // Fig. (c)
+        Halfedge_handle f = P.split_facet(g->next(),
+                                        g->next()->next()->next());    // Fig. (d)
+        Halfedge_handle e = P.split_edge(f);
+        e->vertex()->point() = frt;                                    // Fig. (e)
+        P.split_facet( e, f->next()->next());                          // Fig. (f)
+    }
+    else
+    {
+        // cout << "y_front_top: " << y_front_top << ", y_back_top: " << y_back_top << endl;
+        // cout << "pay attention to this specific case!" << endl;
+        P.split_edge(h->next());
+        P.split_edge(g); 
+        h->next()->vertex()->point()     = brt;
+        g->opposite()->vertex()->point() = frb;
+        Halfedge_handle f = P.split_facet(g->prev(), g->next()->next());
+    }
+    CGAL_postcondition(P.is_valid());
+    return h;
+}
+
+
+void gen_all_meshes(
+    const vector<vector<double>> vol_params, 
+    vector<Nef_Polyhedron> & vol_n_polyhedra)
+{
+    size_t vid = 0;
+    for (auto v : vol_params)
+    {
+        if (v[3] > 0 && v[4] > 0 && v[5] > 0)
+        {
+            Polyhedron p;
+            create_polyhedron_for_a_volume(v, p);
+            Nef_Polyhedron n(p);
+            vol_n_polyhedra.push_back(n);
+            vid ++;
+        }
+    }
+    cout << "*** created " << vol_params.size() << " volumes!" << endl;
+}
+
+size_t tree_union(vector<Nef_Polyhedron> vol_n_polyhedra, Nef_Polyhedron &out_n){
+    vector<Nef_Polyhedron> out_n_polyhedra;
+    bool to_union = true;
+    size_t union_steps = 0;
+    while(to_union){
+        size_t num_to_union = vol_n_polyhedra.size();
+        for (size_t i = 0; i < num_to_union; i=i+2){
+            if (i == num_to_union - 1){
+                out_n_polyhedra.push_back(vol_n_polyhedra[i]);
+            }
+            else{
+                Nef_Polyhedron out;
+                out = vol_n_polyhedra[i] + vol_n_polyhedra[i+1]; 
+                out_n_polyhedra.push_back(out);
+                union_steps ++;
+            }
+        }
+
+        if (out_n_polyhedra.size() == 1){
+            to_union = false;
+            out_n = out_n_polyhedra[0];
+        }
+        else{
+            vol_n_polyhedra.clear();
+            vol_n_polyhedra = out_n_polyhedra;
+            out_n_polyhedra.clear();
+        }
+    }
+    return union_steps;
+}
+
+double computing_volume_of_nef_polyhedron(
+    const Nef_Polyhedron& nef)
+{
+    Mesh mesh;
+    try
+    {
+        CGAL::convert_nef_polyhedron_to_polygon_mesh(nef, mesh, true);
+    }
+    catch(const std::exception& e)
+    {
+        cout << e.what() << endl;
+        vector<Point_3> points;
+        vector<vector<size_t>> polygons;
+        CGAL::convert_nef_polyhedron_to_polygon_soup(
+            nef, points, polygons, true);
+        // cout << "converted nef into points and polygons " << endl;
+        PMP::repair_polygon_soup(points, polygons);
+        // cout << "repaired polygon soup " << endl;
+        PMP::orient_polygon_soup(points, polygons);
+        // cout << "oriented polygon soup " << endl;
+        PMP::polygon_soup_to_polygon_mesh(points, polygons, mesh);
+    }
+        // cout << "converted polygon soup to polygon mesh " << endl;
+    PMP::stitch_borders(mesh);
+    bool bound_volume;
+    try{
+        bound_volume = PMP::does_bound_a_volume(mesh);
+    }
+    catch(const std::exception& e)
+    {
+        cerr << "Failed to compute the volume!" << endl;
+        return 1e7;
+    }
+    if (bound_volume)
+    {
+        double volume = CGAL::to_double(PMP::volume(mesh));
+        return  volume; // merge j to i
+    }
+    else
+    {
+        cerr << "Failed to compute the volume!" << endl;
+        return 1e7;
+    }
+}
+
+double compute_volume_from_param(
+    const vector<double> param)
+{
+    double height = param[4] * param[6];
+    double sinn = sqrt(1 - param[6] * param[6]);
+    double width = param[3];
+    double depth = (param[5] * param[6] + param[4]/2*sinn) * 2;
+    double vol_vol = height * width * depth;
+
+    double vol_fb_d = param[4] * sinn;
+    double vol_cut = width * vol_fb_d * height;
+    vol_vol -= vol_cut;
+
+    return vol_vol;
+}
+
+bool is_possible_to_merge(
+    const size_t i, const size_t j, const double buffer_dist,
+    const Eigen::VectorXd& min_allx, const Eigen::VectorXd& max_allx,
+    const Eigen::VectorXd& min_ally, const Eigen::VectorXd& max_ally,
+    const Eigen::VectorXd& min_allz, const Eigen::VectorXd& max_allz)
+{
+    if (min_allx(i) > max_allx(j) + buffer_dist 
+        || min_allx(j) > max_allx(i) + buffer_dist
+        || min_ally(i) > max_ally(j) + buffer_dist
+        || min_ally(j) > max_ally(i) + buffer_dist
+        || min_allz(i) > max_allz(j) + buffer_dist
+        || min_allz(j) > max_allz(i) + buffer_dist)
+
+        return false;
+    else
+        return true;
+}
+
+
+
+
+pair<double, int> computing_merging_cost_of_one_pair(
+    const Nef_Polyhedron& plh_i,
+    const Nef_Polyhedron& plh_j,
+    const Nef_Polyhedron& plh_nbh,
+    const Nef_Polyhedron& plh_merge)
+{
+    Nef_Polyhedron nbh_diff, diff;
+    double vol_nbh_diff, vol_diff, vol_i, vol_j;
+    vol_i = computing_volume_of_nef_polyhedron(plh_i);
+    vol_j = computing_volume_of_nef_polyhedron(plh_j);
+    assert (vol_i > 0 && vol_j > 0);
+    try
+    {
+        diff = plh_i - plh_j;
+
+        if (diff == Nef_Polyhedron::EMPTY)
+            vol_diff = 0;
+        else
+            vol_diff = computing_volume_of_nef_polyhedron(diff);
+    }
+    catch(const std::exception& e)
+    {
+        CGAL::draw(diff);
+        vol_diff = 1e7;
+    }
+    
+    try
+    {
+        nbh_diff = plh_merge - plh_nbh;
+
+        if (nbh_diff == Nef_Polyhedron::EMPTY)
+            vol_nbh_diff = 0;
+            
+        else
+            vol_nbh_diff = computing_volume_of_nef_polyhedron(nbh_diff);
+    }
+    catch(const std::exception& e)
+    {
+        // CGAL::draw(new_vol);
+        vol_nbh_diff = 1e7;
+    }
+    
+    if (vol_diff < vol_nbh_diff)
+        return make_pair(vol_diff, -1);
+    else
+        return make_pair((vol_i / vol_j) * vol_nbh_diff, 1);
+}
+
+
+void project_pts_to_update_volume(
+    const Eigen::MatrixXd& pts,
+    const vector<double>& param,
+    vector<double>& updated_param)
+{
+    cout << "pts " << pts << endl;
+    updated_param = param;
+    // cout << "original param " ;
+    // for (auto p : updated_param)
+    //     cout << p << ", " ;
+    // cout << endl;
+    Eigen::Vector3d vol_center;
+    vol_center << param[0], param[1], param[2];
+    Eigen::MatrixXd pts_to_center_dist = pts;
+    pts_to_center_dist.rowwise() -= vol_center.transpose();
+    // the sign of y shouldn't affect the updating
+    pts_to_center_dist.col(1) = pts_to_center_dist.col(1).cwiseAbs(); 
+    // cout << "pts_to_center_dist: " << pts_to_center_dist << endl; 
+
+    double sinn = sqrt(1 - param[6] * param[6]);
+    double tann = sinn / param[6];
+    Eigen::Vector3d y_dir;
+    y_dir << 0, param[6], sinn;
+    Eigen::Vector3d z_dir;
+    z_dir << 0, -sinn, param[6];
+
+    Eigen::VectorXd dist_y = pts_to_center_dist * y_dir;
+    // Eigen::VectorXd proj_z = pts_to_center_dist * z_dir;
+    // cout << "proj z: " << proj_z.transpose() << endl;
+    // cout << "dist y: " << dist_y.transpose() << endl;
+
+    // Update X
+    double max_X_of_pts = pts.col(0).maxCoeff(), min_X_of_pts = pts.col(0).minCoeff();
+    double max_X_of_vol = param[0] + param[3] / 2, min_X_of_vol = param[0] - param[3] / 2;
+    double max_X = max_X_of_pts > max_X_of_vol ? max_X_of_pts : max_X_of_vol;
+    double min_X = min_X_of_pts < min_X_of_vol ? min_X_of_pts : min_X_of_vol;
+    updated_param[0] = (max_X + min_X) / 2;
+    updated_param[3] = max_X - min_X;
+
+    // Update zc
+    double max_dist_y = dist_y.maxCoeff();
+    double r = max_dist_y > updated_param[5] ? max_dist_y : updated_param[5];
+    double zc = updated_param[2] + r / sinn;
+
+    // update Z
+    double max_Z_of_pts = pts.col(2).maxCoeff(), min_Z_of_pts = pts.col(2).minCoeff();
+    double max_Z_of_vol = param[2] + updated_param[5]*sinn + param[4]/2 * param[6],
+           min_Z_of_vol = param[2] + updated_param[5]*sinn - param[4]/2 * param[6];
+    double max_Z = max_Z_of_pts > max_Z_of_vol ? max_Z_of_pts : max_Z_of_vol;
+    double min_Z = min_Z_of_pts < min_Z_of_vol ? min_Z_of_pts : min_Z_of_vol;
+    updated_param[4] = (max_Z - min_Z) / param[6];
+    updated_param[5] = ((zc - (max_Z + min_Z)/2) * tann) / param[6];
+    updated_param[2] = (max_Z + min_Z)/2 - ((zc - (max_Z + min_Z)/2) * tann) * tann;
+    // cout << "max Z: " << max_Z << ", min Z: " << min_Z << endl;
+    // cout << "((zc - (max_Z + min_Z)/2) * tann) * tann: " << ((zc - (max_Z + min_Z)/2) * tann) * tann;
+    // cout << "updated param, zc: " << zc << endl;
+    // cout << "updated param " ;
+    // for (auto p : updated_param)
+    //     cout << p << ", " ;
+    // cout << endl;
 }
 
 
@@ -1005,57 +1415,6 @@ void parsing_merging_result(
     }
 }
 
-
-void gen_all_meshes(
-    const vector<vector<double>> vol_params, 
-    vector<Nef_Polyhedron> & vol_n_polyhedra)
-{
-    size_t vid = 0;
-    for (auto v : vol_params)
-    {
-        if (v[3] > 0 && v[4] > 0 && v[5] > 0)
-        {
-            Polyhedron p;
-            create_polyhedron_for_a_volume(v, p);
-            Nef_Polyhedron n(p);
-            vol_n_polyhedra.push_back(n);
-            vid ++;
-        }
-    }
-    cout << "*** created " << vol_params.size() << " volumes!" << endl;
-}
-
-
-size_t tree_union(vector<Nef_Polyhedron> vol_n_polyhedra, Nef_Polyhedron &out_n){
-    vector<Nef_Polyhedron> out_n_polyhedra;
-    bool to_union = true;
-    size_t union_steps = 0;
-    while(to_union){
-        size_t num_to_union = vol_n_polyhedra.size();
-        for (size_t i = 0; i < num_to_union; i=i+2){
-            if (i == num_to_union - 1){
-                out_n_polyhedra.push_back(vol_n_polyhedra[i]);
-            }
-            else{
-                Nef_Polyhedron out;
-                out = vol_n_polyhedra[i] + vol_n_polyhedra[i+1]; 
-                out_n_polyhedra.push_back(out);
-                union_steps ++;
-            }
-        }
-
-        if (out_n_polyhedra.size() == 1){
-            to_union = false;
-            out_n = out_n_polyhedra[0];
-        }
-        else{
-            vol_n_polyhedra.clear();
-            vol_n_polyhedra = out_n_polyhedra;
-            out_n_polyhedra.clear();
-        }
-    }
-    return union_steps;
-}
 
 void save_vol_8pts_as_obj(
     const vector<Eigen::MatrixXd>& merged_8pts,

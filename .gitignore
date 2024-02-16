@@ -2,4 +2,5 @@
 3-merging/build/
 0-data/
 sobss/build/
+sobss/__pycache__/
 .DS_Store
