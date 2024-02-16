@@ -33,7 +33,7 @@ cd ../
 python main.py -i <path to the input point cloud *.ply> -w <directory for saving the results>
 ```
 click the buttons `skeletonize`->`coarse segment`-> `merge`->`evaluate`. Results will be shown in the open3d window.
-
+![gui](gui.png)
 ## Tested OS
 - Ubuntu 20.04 LTS.
 
