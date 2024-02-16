@@ -9,7 +9,7 @@ import argparse
 import json
 import coarse_segmentation as cs
 
-sobss_lib = ctypes.cdll.LoadLibrary("build/libsobss.dylib")
+sobss_lib = ctypes.cdll.LoadLibrary("build/libsobss.so")
 
 
 def parse_bss_segm(path):
@@ -144,16 +144,6 @@ def actions(pcd_path, working_folder):
     BSS_MERGED_VOLUME_NAME = "BSS merged volume"
     BSS_MERGED_TRI_MESH_NAME = "BSS merged mesh (tri)"
     DISTANCE_TO_ALIGN_NAME = "Distance to input (0-1 m)"
-
-    bunny = o3d.data.BunnyMesh()
-    bunny_mesh = o3d.io.read_triangle_mesh(bunny.path)
-    bunny_mesh.compute_vertex_normals()
-
-    bunny_mesh.paint_uniform_color((1, 0.75, 0))
-    bunny_mesh.compute_vertex_normals()
-    cloud = o3d.geometry.PointCloud()
-    cloud.points = bunny_mesh.vertices
-    cloud.normals = bunny_mesh.vertex_normals
 
         
     def skeletonize(o3dvis):
