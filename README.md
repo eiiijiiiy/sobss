@@ -1,11 +1,13 @@
 # About sobss
 
-Compact building reconstruction based on Single-orientation Building Section Skeleton (BSS). This is an implementation of the paper: 
+Compact building reconstruction based on Single-orientation Building Section Skeleton (BSS). This is an implementation of the [paper](https://doi.org/10.1016/j.isprsjprs.2024.01.020): 
 
 ```
-Yijie Wu, Fan Xue*, Maosu Li, and Sou-Han Chen
-A novel Building Section Skeleton for compact 3D reconstruction from point clouds: A study of high-density urban scenes (In press)
+Yijie Wu, Fan Xue*, Maosu Li, and Sou-Han Chen, 2024.
+A novel Building Section Skeleton for compact 3D reconstruction from point clouds: A study of high-density urban scenes.
+ISPRS Journal of Photogrammetry and Remote Sensing 209, 85-100. 
 ```
+
 # How to use
 ## Stage 1
 ### Skeletonization
