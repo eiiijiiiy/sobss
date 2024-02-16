@@ -5,23 +5,22 @@
 int merge_bss_segms(
     const string working_folder) 
 {
-    string bss_segm_path = working_folder + "/bss_coarse_segm.txt";
-    
-    if (!filesystem::exists(bss_segm_path))
+    filesystem::path bss_segm_path = filesystem::path(working_folder) / filesystem::path("bss_coarse_segm.txt");
+    if (!filesystem::exists(bss_segm_path.string()))
     {
         cerr << "no bss_segm.txt in " << working_folder << endl;
         return EXIT_FAILURE;
     }
     
-    string conf_path = working_folder + "/config.json";
-    if (!filesystem::exists(conf_path))
+    filesystem::path conf_path = fileseystem::path(working_folder) / fileseystem::path("config.json");
+    if (!filesystem::exists(conf_path.string()))
     {
         cerr << "no config.json in " << working_folder << endl;
         return EXIT_FAILURE;
     }
 
     rj::Document conf_doc;
-    if (!read_config(conf_path.c_str(), conf_doc))
+    if (!read_config(conf_path.string().c_str(), conf_doc))
         return EXIT_FAILURE;
     
     double lambda;
@@ -29,7 +28,7 @@ int merge_bss_segms(
         lambda = conf_doc["lambda"].GetDouble();
     else
     {
-        cerr << "lambda is not set in " << conf_path << endl;
+        cerr << "lambda is not set in " << conf_path.string() << endl;
         cout << "set lambda as 0.5 by default. \n";
         lambda = 0.5;
     }
@@ -39,14 +38,14 @@ int merge_bss_segms(
         sigma = conf_doc["sigma"].GetDouble();
     else
     {
-        cerr << "sigma is not set in " << conf_path << endl;
+        cerr << "sigma is not set in " << conf_path.string() << endl;
         cout << "set sigma as 0.5 by default. \n";
         sigma = 0.5;
     }
 
     // 1. load in the result of coarse segmentation
     vector<vector<double>> input_vol_params;
-    ifstream file(bss_segm_path);
+    ifstream file(bss_segm_path.string());
     string str;
     size_t num_vol, num_box;
     num_box = 0;
@@ -99,8 +98,8 @@ int merge_bss_segms(
         size_t union_steps = tree_union(merged_vol_n_polyhedra, union_merged);
     
     // 6. save the result
-    string param_path = working_folder + "bss_merged_segm.txt";
-    save_vol_param(merged_vol_param, param_path);
+    filesystem::param_path = filesystem::path(working_folder) / filesystem::path("bss_merged_segm.txt");
+    save_vol_param(merged_vol_param, param_path.string());
 
     vector<Point_3> union_points_tri;
     vector<vector<size_t>> union_polygons_tri; 
@@ -110,10 +109,10 @@ int merge_bss_segms(
             union_merged, union_points_tri, union_polygons_tri, true);
     }
 
-    string obj_path = working_folder + "bss_merged_vol.obj";
-    save_vol_8pts_as_obj(merged_vol_8pts, obj_path);
-    string union_tri_path = working_folder + "bss_merged_tri.obj";
-    CGAL::IO::write_OBJ(union_tri_path, union_points_tri, union_polygons_tri);
+    filesystem::path obj_path = filesystem::path(working_folder) / filesystem::path("bss_merged_vol.obj");  
+    save_vol_8pts_as_obj(merged_vol_8pts, obj_path.string());
+    filesystem::path union_tri_path = filesystem::path(working_folder) / filesystem::path("bss_merged_tri.obj");
+    CGAL::IO::write_OBJ(union_tri_path.string(), union_points_tri, union_polygons_tri);
     
     return EXIT_SUCCESS;
 }

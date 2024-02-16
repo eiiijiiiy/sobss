@@ -7,7 +7,7 @@ int collect_bss_atoms(
     const string working_folder) 
 {
     rj::Document config_doc;
-    string conf_path = working_folder + "/config.json";
+    filesystem::path conf_path = filesystem::path(working_folder) / filesystem::path("config.json");
     if (!read_config(conf_path.c_str(), config_doc))
         return EXIT_FAILURE;
     
@@ -85,19 +85,20 @@ int collect_bss_atoms(
     cout << "rotated to align the axis. " << endl;
     
     // 6. save the whole aligned pcd and non-horitonatl aligned pcd
-    string out_aa_pcd_path = working_folder + "/aligned.ply";
-    string out_aa_nh_pcd_path = working_folder + "/non_horizontal.ply";
-    open3d::io::WritePointCloud(out_aa_pcd_path, *in_pcd);
-    open3d::io::WritePointCloud(out_aa_nh_pcd_path, nh_pcd);
+    
+    filesystem::path out_aa_pcd_path = filesystem::path(working_folder) / filesystem::path("aligned.ply");
+    filesystem::path out_aa_nh_pcd_path = filesystem::path(working_folder) / filesystem::path("non_horizontal.ply");
+    open3d::io::WritePointCloud(out_aa_pcd_path.string(), *in_pcd);
+    open3d::io::WritePointCloud(out_aa_nh_pcd_path.string(), nh_pcd);
 
     // 7. skeletonize the non-horizontal pcd
-    string bss_atom_path = working_folder + "/bss_atom.txt";
-    string bss_atom_pcd_path = working_folder + "/bss_atom_pcd.ply";
+    filesystem::path bss_atom_path = filesystem::path(working_folder) / filesystem::path("bss_atom.txt");  
+    filesystem::path bss_atom_pcd_path = filesystem::path(working_folder) / filesystem::path("bss_atom_pcd.ply");
     
     fast_vote(
         nh_pcd, voxel_size,
         ng_pt_idx[selected_normal_id],
-        bss_atom_path, bss_atom_pcd_path);
+        bss_atom_path.string(), bss_atom_pcd_path.string());
     
     return EXIT_SUCCESS;
 }
