@@ -1,6 +1,6 @@
 .vscode/
 3-merging/build/
 0-data/
-sobss/build/
-sobss/__pycache__/
+__pycache__/
 .DS_Store
+build/

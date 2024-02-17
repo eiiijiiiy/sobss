@@ -10,7 +10,7 @@ import json
 import coarse_segmentation as cs
 import platform
 
-if platform.system() == "Darwin:
+if platform.system() == "Darwin":
     sobss_lib = ctypes.cdll.LoadLibrary("build/libsobss.dylib")
 elif platform.system() == "Linux":
     sobss_lib = ctypes.cdll.LoadLibrary("build/libsobss.so")
@@ -69,6 +69,7 @@ def parse_bss_segm(path):
     bss_segm_wf = o3d.geometry.LineSet()
     bss_segm_wf.points = o3d.utility.Vector3dVector(segm_coords.reshape(-1, 3))
     bss_segm_wf.lines = o3d.utility.Vector2iVector(segm_edges.reshape(-1, 2))
+    bss_segm_wf.colors = o3d.utility.Vector3dVector(np.array([[1, 0.253, 1]] * num * 4))
     
     #  vol
     vol_coords = np.zeros((num, 8, 3))
@@ -119,20 +120,21 @@ def parse_bss_segm(path):
     return bss_segm_wf, bss_segm_volume_wf
 
 
-def initialize_working_folder(working_folder):
+def initialize_working_folder(
+        working_folder, vs = 0.25, p = 2.0, nmi = np.pi/9, sigma = 2.0, lmbd = 2.0):
     if os.path.exists(working_folder):
         shutil.rmtree(working_folder)
     os.makedirs(working_folder)
 
     params = {
-        'voxel_size': 0.25, 
-        'ps': 2.0,
-        'dxi': 2.0,
-        'xi': 2.0,
-        'zci': 2.0,
-        'nmi': np.pi/9,
-        'sigma': 2.0,
-        'lambda': 2.0}
+        'voxel_size': vs, 
+        'ps': p,
+        'dxi': p / 2,
+        'xi': p,
+        'zci': p,
+        'nmi': nmi,
+        'sigma': sigma,
+        'lambda': lmbd}
 
     conf_path = os.path.join(working_folder, "config.json")
     with open(conf_path, "w") as f:
@@ -141,7 +143,7 @@ def initialize_working_folder(working_folder):
 
 def actions(pcd_path, working_folder):
     input_pcd = o3d.io.read_point_cloud(pcd_path)
-    INPUT_NAME = "innput pcd"
+    INPUT_NAME = "input pcd"
     ALIGN_NAME = "aligned pcd"
     NH_NAME = "aligned non-horizontal pcd"
     BSS_ATOM_NAME = "BSS atoms"
@@ -173,8 +175,10 @@ def actions(pcd_path, working_folder):
         bss_atom_pts = np.loadtxt(bss_atom_path)[:,:3]
         bss_atom = o3d.geometry.PointCloud()
         bss_atom.points = o3d.utility.Vector3dVector(bss_atom_pts)
+        bss_atom.colors = o3d.utility.Vector3dVector(np.array([[1, 0.253, 1]] * bss_atom_pts.shape[0]))
 
         o3dvis.add_geometry({"name": BSS_ATOM_NAME, "geometry": bss_atom})
+        o3dvis.show_geometry(INPUT_NAME, False)
         o3dvis.setup_camera(45, np.array([0,0,0]), np.array([0, 0, 30]), np.array([0,0,1]))
         o3dvis.post_redraw()
         # view_ctl = o3dvis.get_view_control()
@@ -186,7 +190,8 @@ def actions(pcd_path, working_folder):
 
         bss_coarse_segm_path = os.path.join(working_folder, "bss_coarse_segm.txt")
         bss_coarse_segm, bss_coarse_volume = parse_bss_segm(bss_coarse_segm_path)
-
+        o3dvis.show_geometry(ALIGN_NAME, False)
+        o3dvis.show_geometry(NH_NAME, False)
         o3dvis.add_geometry({"name": BSS_COARSE_SEGM_NAME, "geometry": bss_coarse_segm})
         o3dvis.add_geometry({"name": BSS_COARSE_VOLUME_NAME, "geometry": bss_coarse_volume})
     
@@ -199,6 +204,8 @@ def actions(pcd_path, working_folder):
         bss_merged_segm_path = os.path.join(working_folder, "bss_merged_segm.txt")
         bss_merged_segm, bss_merged_volume = parse_bss_segm(bss_merged_segm_path)
 
+        o3dvis.show_geometry(BSS_COARSE_SEGM_NAME, False)
+        o3dvis.show_geometry(BSS_COARSE_VOLUME_NAME, False)
         o3dvis.add_geometry({"name": BSS_MERGED_SEGM_NAME, "geometry": bss_merged_segm})
         o3dvis.add_geometry({"name": BSS_MERGED_VOLUME_NAME, "geometry": bss_merged_volume})
 
@@ -211,6 +218,7 @@ def actions(pcd_path, working_folder):
         if evaluate.distance_from_pcd_to_trimesh(working_folder, truncation=1.0):
             evaluate_pcd_path = os.path.join(working_folder, "evaluated.ply")
             evaluated_pcd = o3d.io.read_point_cloud(evaluate_pcd_path)
+            o3dvis.show_geometry(BSS_MERGED_TRI_MESH_NAME, False)
             o3dvis.add_geometry({"name": DISTANCE_TO_ALIGN_NAME, "geometry": evaluated_pcd})
         else:
             print("failed to evaluate")
@@ -219,18 +227,29 @@ def actions(pcd_path, working_folder):
         "name": INPUT_NAME,
         "geometry": input_pcd}
         ],
-        actions=[("Skeletonize", skeletonize),
-                ("Coarse segment", coarse_segment),
-                ("Merge", merge_segments),
-                ("Evaluate", evaluate_merged_segments)
+        actions=[("skeletonize", skeletonize),
+                ("coarse segment", coarse_segment),
+                ("merge", merge_segments),
+                ("evaluate", evaluate_merged_segments)
                 ])
 
+# main
 parser = argparse.ArgumentParser()
+# set input and working folder
 parser.add_argument('-i', type=str, required=True, help="input point cloud with normals (.ply)")
 parser.add_argument('-w', type=str, required=True, help="working folder")
+
+# set parameters
+parser.add_argument('-v', type=float, default=0.25, help="voxel size in skeletonization")
+parser.add_argument('-p', type=float, default=2.0, help="distance interval to group BSS atoms in coarse segmentation")
+parser.add_argument('-n', type=float, default=np.pi/9, help="angular interval to group BSS atoms in coarse segmentation")
+parser.add_argument('-s', type=float, default=2.0, help="truncate distance in merging")
+parser.add_argument('-l', type=float, default=2.0, help="weighting factor in merging")
+
 args = parser.parse_args()
 
-initialize_working_folder(args.w)
+initialize_working_folder(
+    args.w, vs = args.v, p = args.p, nmi = args.n, sigma = args.s, lmbd = args.l)
 
 actions(args.i, args.w)
 

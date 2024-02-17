@@ -28,14 +28,23 @@ cmake ..
 make
 ```
 ## Run the gui
+- Set the path to the input point cloud, a directory to save the intermediates and final results, and parameters (optional). 
 ```
 cd ../
-python main.py -i <path to the input point cloud *.ply> -w <directory for saving the results>
+python main.py \
+-i <path to the input point cloud *.ply [required]> \
+-w <directory of the working folder (will be cleared before running) [required]> \
+-v <voxel size in `skeletonizing` [optional]> \
+-p <distance interval to group BSS atoms in `coarse segmentation` [optional]> \
+-n <angular interval to group BSS atoms in `coarse segmentation` [optional]> \
+-s <truncated distance in `merging` [optional]> \
+-l <factor weighting the compactness and accuracy in `merging` [optional]> 
 ```
-click the buttons `skeletonize`->`coarse segment`-> `merge`->`evaluate`. Results will be shown in the open3d window.
+- Click the buttons `skeletonize`->`coarse segment`-> `merge`->`evaluate`. Results will be shown in the open3d window.
 ![gui](gui.png)
-## Tested OS
-- Ubuntu 20.04 LTS.
+## OS tested on
+- Ubuntu 20.04 LTS
+- MacOS 14.1.1 M1
 
 # Test data and results
 Data and results can be downloaded at [OneDrive](https://connecthkuhk-my.sharepoint.com/:f:/g/personal/yijiewu_connect_hku_hk/Ej77MEfWVCtLrJVM-27fO40Brt0B5MLBiAErMaX3p0M3YQ?e=2cHrAg): 
@@ -43,13 +52,7 @@ Data and results can be downloaded at [OneDrive](https://connecthkuhk-my.sharepo
 - Results: Reconstructed results are in `2-union_tri(results)`. 
 - Evaluation: Inputs colorized in terms of the distances to the results are in `3-r2s(evaluation)`.
 
-# TODO
-- [ ] clean the code
-- [x] make the interface more user-friendly  
-    - [x] call the cpp code in python
-    - [x] update the results and tune the parameters in one open3d window (python)
-
 # Contacts
 
 - Wu, Y.: [yijiewu@connect.hku.hk](mailto:yijiewu@connect.hku.hk?subject=[GitHub]sobss)
-- Xue, F.: [xuef@hku.hk](mailto:xuef@hku.hk?subject=[GitHub]sobss), [frankxue.com](//frankxue.com/)
+- Xue, F.: [xuef@hku.hk](mailto:xuef@hku.hk?subject=[GitHub]sobss), [frankxue.com](https://frankxue.com/)
