@@ -28,7 +28,7 @@ cmake ..
 make
 ```
 ## Run the gui
-### Video instruction
+### Video instruction (click the figure below to view)
 [![how to use sobss](http://img.youtube.com/vi/AKNAsfuQb94/0.jpg)](http://www.youtube.com/watch?v=AKNAsfuQb94)
 ### Text instruction
 - Set the path to the input point cloud, a directory to save the intermediates and final results, and parameters (optional). 
